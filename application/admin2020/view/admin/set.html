@@ -1,0 +1,145 @@
+{extend name="common/common" /}
+
+{block name="css"}
+
+{/block}
+
+{block name="body"}
+<div class="x-body">
+        <input type="hidden"  name="id"  value="{$info.id}">
+        <div class="layui-form-item">
+            <label class="layui-form-label">
+                用户名
+            </label>
+            <div class="layui-input-inline">
+                <input type="text" name="username" class="layui-input" {if condition="$info && $info.id"}disabled="disabled"{/if} value="{$info ? $info.username : ''}">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">
+                租用费率
+            </label>
+            <div class="layui-input-inline">
+                <input type="text" name="rent_rate" class="layui-input" value="{$info ? $info.rent_rate : ''}">
+            </div>
+        </div>
+        {if condition="$info && $info.id"}
+        <div class="layui-form-item">
+            <label class="layui-form-label">
+                旧密码
+            </label>
+            <div class="layui-input-inline">
+                <input type="text" name="password_old"
+                       class="layui-input" value="">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">
+                新密码
+            </label>
+            <div class="layui-input-inline">
+                <input type="text" name="password"
+                        class="layui-input" value="">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">
+                重复密码
+            </label>
+            <div class="layui-input-inline">
+                <input type="text" name="password2"
+                        class="layui-input" value="">
+            </div>
+        </div>
+        {/if}
+        <div class="layui-form-item">
+            <label class="layui-form-label">
+                角色
+            </label>
+            <div class="layui-input-inline">
+                <select name="role_id">
+                    <option value="0" >请选择角色</option>
+                    {volist name="roleData" id="vo"}
+                    <option value="{$vo.id}" {if condition="$vo.id == $info.role_id"}selected{/if}>{$vo.rolename}</option>
+                    {/volist}
+                </select>
+                </select>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">
+                租用账户
+            </label>
+            <div class="layui-input-inline">
+                <select name="is_inner" class="changeTime">
+                  <option value="2" {if condition="$info.is_inner == 2"}selected{/if}>否</option>/
+                  <option value="1" {if condition="$info.is_inner == 1"}selected{/if}>是</option>/
+                </select>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">
+                指定通道
+            </label>
+            <div class="layui-input-inline">
+                <select name="channel_id">
+                    <option value="0" >请选择通道</option>
+                    {volist name="channelData" id="vo"}
+                    <option value="{$vo.id}" {if condition="$vo.id == $info.channel_id"}selected{/if}>{$vo.name_en}</option>
+                    {/volist}
+                </select>
+                </select>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">
+                通道费率
+            </label>
+            <div class="layui-input-inline">
+                <input type="text" name="channel_rate" class="layui-input" value="{$info ? $info.channel_rate : ''}">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">
+            </label>
+            <button  class="layui-btn" lay-filter="set" lay-submit="" id="btn">
+               保存
+            </button>
+        </div>
+</div>
+{/block}
+
+{block name="js"}
+<script type="text/javascript">
+    $("#btn").click(function(){
+        var data = {
+            id: $('input[name=id]').val(),
+            username: $('input[name=username]').val(),
+            rent_rate: $('input[name=rent_rate]').val(),
+            password_old: $('input[name=password_old]').val(),
+            password: $('input[name=password]').val(),
+            password2: $('input[name=password2]').val(),
+            role_id: $('select[name=role_id]').val(),
+            channel_id: $('select[name=channel_id]').val(),
+            channel_rate: $('input[name=channel_rate]').val(),
+            is_inner: $("select[name=is_inner]").val()
+        };
+       //加载效果可卡重复点击
+       layer.load();
+        $.ajax({
+            url: "{:url('set')}",
+            type: "POST",
+            data: data,
+            success:function(result){
+                layer.msg(result.msg);
+                setTimeout(function(){
+                    //关闭加载效果
+                    layer.closeAll();
+                    //关闭当前子窗口
+                    if(result.code == 200) x_admin_close(1);
+                }, 1000);
+            }
+        });
+   });
+</script>
+{/block}

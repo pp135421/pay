@@ -1,0 +1,154 @@
+{extend name="common/common" /}
+
+{block name="css"}
+<style>
+  a{
+    text-decoration: none;
+    color: #009688;
+  }
+</style>
+{/block}
+
+{block name="body"}
+    <div class="x-body">
+      <div class="layui-row">
+        <form class="layui-form layui-col-md12 x-so">
+          <button class="layui-btn" lay-submit="" lay-filter="sreach"><i class="layui-icon">&#xe615;</i></button>
+          <!-- <a class="layui-btn layui-btn-small" style="line-height:1.6em;" href="javascript:location.replace(location.href);" title="刷新">
+            <i class="layui-icon" style="line-height:30px">ဂ</i>
+          </a> -->
+          <span style="float: right;" class="layui-btn" onclick="x_admin_show('添加银行卡', '{:url("set")}', 600, 500)"><i class="layui-icon"></i>添加</button>
+        </form>
+      </div>
+
+      <form class="layui-form layui-col-md12 x-so">
+      <table class="layui-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>银行开户名<br/>银行卡号</th>
+            <th>银行英文编号<br/>银行中文名</th>
+            <th>隐藏id<br/>key</th>
+            <th>成功交易<br/>订单总数</th>
+            <th>成功率（%）</th>
+            <th>收入金额（元）</th>
+            <th >状态</th>
+            <th >操作</th>
+          </tr>
+        </thead>
+        <tbody>
+
+        {volist name="list2" id="vo"}
+          <tr>
+            <td>{$vo.id}</td>
+            <td>{$vo.bank_account}<br/>{$vo.card_no}</td>
+            <td>{$vo.bank_mark}<br/>{$vo.bank_name}</td>
+            <td>{$vo.card_id}<br/>{$vo.key}</td>
+            <td>
+              <span class="layui-btn {if condition="!count($vo.countSuccess)"}layui-btn-danger{/if} layui-btn-xs" onclick="{if condition='$vo.countSuccess'}x_admin_show('银行卡：{$vo.card_no}-成功订单表', '{:url("order/index", ["relate_key" => $vo.card_no, "platform_order_id_arr" => implode(",", $vo.countSuccess)])}'){/if}">{:count($vo.countSuccess)}
+              </span>&ensp;&ensp;/
+              <span class="layui-btn {if condition="!count($vo.countTotal)"}layui-btn-danger{/if} layui-btn-xs" onclick="x_admin_show('银行卡：{$vo.card_no}-所有订单表', '{:url("order/index", ["relate_key" => $vo.card_no, "platform_order_id" => implode(",", $vo.countTotal)])}')">{:count($vo.countTotal)}
+              </span>
+            </td>
+            <td>
+              <span class="layui-btn {if condition="!count($vo.countSuccess)"}layui-btn-danger{/if} layui-btn-xs" style="width: 55px;" onclick="javascript:void(0);">{if condition="count($vo.countTotal)"}{:bcadd(count($vo.countSuccess) * 100 / count($vo.countTotal), 0, 2)}{else /}0.00{/if}%</span>
+            </td>
+            <td>{$vo.moneySuccess}</td>
+            <td>
+              <input type="checkbox" {if condition='$vo.status==1'}checked="checked"{/if} name="open" lay-text="启用|禁用" lay-skin="switch" lay-filter="switchTest" title="开关" value="{$vo.id}">
+            </td>
+            <td class="td-manage">
+              <span class="layui-btn  layui-btn-sm" onclick="x_admin_show('支付宝转银行卡测试-{$vo.id}', '{:url("channel/test", ['name_en'=>$bankChannelInfo.name_en, 'relate_key' => $vo.card_no])}', 600, 300)"><i class="layui-icon">&#xe642;</i>银行卡测试</span>
+              <span class="layui-btn  layui-btn-sm" onclick="x_admin_show('修改银行卡', '{:url("set", ['id'=>$vo.id])}', 600, 500)">编辑</span>
+              <span class="layui-btn layui-btn-danger layui-btn-sm" onclick="del(this, '{$vo.id}')">删除</span>
+            </td>
+          </tr>
+        {/volist}
+        </tbody>
+      </table>
+      </form>
+      <div class="page">
+        <div>
+          {$list->render()}
+        </div>
+      </div>
+
+    </div>
+{/block}
+
+{block name="js"}
+
+<script>
+
+    layui.use(['form', 'layedit', 'laydate'], function(){
+        var form = layui.form
+            ,layer = layui.layer
+            ,layedit = layui.layedit
+            ,laydate = layui.laydate;
+
+        //日期
+        laydate.render({
+            elem: '#date'
+        });
+        laydate.render({
+            elem: '#date1'
+        });
+
+        //监听指定开关
+        form.on('switch(switchTest)', function(data){
+            var flag = this.checked ? 1 : 0;
+            var id = this.value;
+            //加载效果可卡重复点击
+            layer.load();
+            $.ajax({
+                url: '{:url("status")}',
+                type:'POST',
+                data: {id: id,status: flag},
+                dataType:'json',
+                success:function(result){
+                    layer.msg(result.msg);
+                    setTimeout(function(){
+                        //关闭加载效果
+                        layer.closeAll();
+                        //关闭当前子窗口
+                        if(result.code == 200) location.reload(true);
+                    }, 1000);
+                }
+            });
+        });
+    });
+
+
+    /*删除*/
+    function del(obj, id){
+        layer.confirm('确认要删除吗？', {
+            btn: ['确认','取消'] //按钮
+        }, function(){
+            //加载效果可卡重复点击
+            layer.load();
+            $.ajax({
+                url: '{:url("del")}',
+                type:'POST',
+                data: {id: id},
+                dataType:'json',
+                success:function(result){
+                    layer.msg(result.msg);
+                    setTimeout(function(){
+                        //关闭加载效果
+                        layer.closeAll();
+                        //强制刷新当前页面
+                        if(result.code == 200) location.reload(true);
+                    }, 1000);
+                }
+            });
+        }, function(){
+        });
+    }
+</script>
+<script>var _hmt = _hmt || []; (function() {
+    var hm = document.createElement("script");
+    hm.src = "https://hm.baidu.com/hm.js?b393d153aeb26b46e9431fabaf0f6190";
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(hm, s);
+})();</script>
+{/block}

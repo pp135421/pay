@@ -1,0 +1,129 @@
+{extend name="common/common" /}
+
+{block name="css"}
+
+{/block}
+
+{block name="body"}
+<div class="x-body">
+    <form class="layui-form">
+        <div class="layui-form-item">
+            <label for="L_email" class="layui-form-label">
+                <span class="x-red">*</span>开户人
+            </label>
+            <div class="layui-input-inline">
+                <input type="text" id="L_username" name="account" autocomplete="off" class="layui-input" value="{$list.bank_account}">
+            </div>
+            <div class="layui-form-mid layui-word-aux">
+                <!--<span class="x-red">*</span>将会成为您唯一的登入名-->
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label"><span class="x-red">*</span>银行名称</label>
+            <div class="layui-input-block" style="width: 190px;">
+                <select name="bank_code">
+                    <option value="">请选择银行名称</option>
+                    {volist name="banklist" id="vo"}
+                        <option value="{$vo.id}" {if condition="$list.bank_id eq $vo.id"}selected{/if}>{$vo.bankname}</option>
+                    {/volist}
+                </select>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label for="L_pass" class="layui-form-label" >
+                <span class="x-red">*</span>支行名称
+            </label>
+            <div class="layui-input-inline">
+
+                <input type="text" id="L_password" name="bankzhiname" autocomplete="off" class="layui-input" value="{$list.bankzhiname}">
+            </div>
+            <div class="layui-form-mid layui-word-aux">
+
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label for="L_pass" class="layui-form-label">
+                <span class="x-red">*</span>银行卡号
+            </label>
+            <div class="layui-input-inline">
+                <input type="text" id="L_paypwd" name="card_number" autocomplete="off" class="layui-input" value="{$list.card_number}">
+            </div>
+            <div class="layui-form-mid layui-word-aux">
+                <!--<span class="x-red">*</span>确保一致-->
+            </div>
+        </div>
+        <!--<div class="layui-form-item">-->
+        <!--<label class="layui-form-label">账户状态</label>-->
+        <!--<div class="layui-input-block">-->
+        <!--<input type="radio" name="status" value="1" title="开启" checked>-->
+        <!--<input type="radio" name="status" value="2" title="关闭" >-->
+        <!--</div>-->
+        <!--</div>-->
+        <div class="layui-form-item">
+            <label for="L_pass" class="layui-form-label">
+                <span class="x-red">*</span>所属省
+            </label>
+            <div class="layui-input-inline">
+                <input type="text" id="L_pass" name="province"  autocomplete="off" class="layui-input" value="{$list.province}">
+            </div>
+            <div class="layui-form-mid layui-word-aux">
+
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label for="L_pass" class="layui-form-label">
+                <span class="x-red">*</span>所属市
+            </label>
+            <div class="layui-input-inline">
+                <input type="text" id="" name="city"  autocomplete="off" class="layui-input" value="{$list.city}">
+            </div>
+            <div class="layui-form-mid layui-word-aux">
+
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label for="L_repass" class="layui-form-label">
+            </label>
+            <span  class="layui-btn" lay-filter="add" lay-submit="">
+                {if condition="$bank_id"}修改{else/}新增{/if}
+                <input type="hidden" name="bank_id" value="{$bank_id}">
+            </span>
+        </div>
+    </form>
+</div>
+
+{/block}
+
+{block name="js"}
+<script>
+    layui.use(['form','layer'], function(){
+        $ = layui.jquery;
+        var form = layui.form
+            ,layer = layui.layer;
+
+        //监听提交
+        form.on('submit(add)', function(data){
+            // console.log(data);return;
+            layer.load();
+            $.ajax({
+                url: "{:url('bank_edit')}",
+                type:"POST",
+                data: data.field,
+                success:function(result){
+                    if(result.status == 1){
+                        layer.closeAll();
+                        swal("成功", result.msg, "success");
+                        setTimeout(function(){
+                            x_admin_close();
+                        },2000)
+                    }else{
+                        layer.closeAll();
+                        swal('失败!!!', result.msg, "error");
+                    }
+                }
+            });
+            return false;
+        });
+    });
+</script>
+{/block}

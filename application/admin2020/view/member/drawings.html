@@ -1,0 +1,73 @@
+{extend name="common/common" /}
+
+{block name="css"}
+
+{/block}
+
+{block name="body"}
+<div class="x-body">
+    <form class="layui-form">
+        <div class="layui-form-item">
+            <label for="L_email" class="layui-form-label">
+                <span class="x-red">*</span> 最大金额
+            </label>
+            <div class="layui-input-inline">
+                <input type="text" id="L_username" name="max_money" autocomplete="off" class="layui-input" value="{$list.max_money}">
+            </div>
+            <div class="layui-form-mid layui-word-aux">
+                <span class="x-red">*</span> 单笔最大金额
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label for="L_email" class="layui-form-label">
+                <span class="x-red">*</span> 最小金额
+            </label>
+            <div class="layui-input-inline">
+                <input type="text" id="L_nickname" name="min_money" autocomplete="off" class="layui-input" value="{$list.min_money}">
+            </div>
+            <div class="layui-form-mid layui-word-aux">
+                <span class="x-red">*</span> 单笔最小金额
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label for="L_repass" class="layui-form-label">
+            </label>
+            <span  class="layui-btn" lay-filter="add" lay-submit="">
+                修改
+            </span>
+        </div>
+    </form>
+</div>
+
+{/block}
+
+{block name="js"}
+<script>
+    layui.use(['form','layer'], function(){
+        $ = layui.jquery;
+        var form = layui.form
+            ,layer = layui.layer;
+
+        //监听提交
+        form.on('submit(add)', function(data){
+            // console.log(data);return;
+            layer.load();
+            $.ajax({
+                url: "{:url('drawings')}",
+                type:"POST",
+                data: data.field,
+                success:function(result){
+                    layer.msg(result.msg);
+                    setTimeout(function(){
+                        //关闭加载效果
+                        layer.closeAll();
+                        //关闭当前子窗口
+                        if(result.status == 1) x_admin_close(1);
+                    }, 1000);
+                }
+            });
+            return false;
+        });
+    });
+</script>
+{/block}

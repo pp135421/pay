@@ -1,0 +1,141 @@
+{extend name="common/common" /}
+
+{block name="css"}
+<style>
+    a{
+       text-decoration: none;
+        /*color: #009688;*/
+    }
+</style>
+{/block}
+
+{block name="body"}
+<div class="x-body">
+    <span class="layui-btn" onclick="x_admin_show('添加下级商户', '{:url("member_edit_under")}', 600, 550)"><i class="layui-icon"></i>添加下级商户</span>
+      <a class="layui-btn layui-btn-small" style="line-height:1.6em;" href="javascript:location.replace(location.href);" title="刷新">
+        <i class="layui-icon" style="line-height:30px">ဂ</i>
+      </a>
+    <form class="layui-form" action="">
+    <table class="layui-table">
+        <thead>
+        <tr>
+            <th>商户号</th>
+            <th>账户</th>
+            <th>昵称</th>
+            <th>上级代理名称</th>
+            <th>用户详情</th>
+            <th>支付宝</th>
+            <th>微信</th>
+            <th>创建时间</th>
+        </tr>
+        </thead>
+        <tbody>
+        {volist name="list" id="vo"}
+        <tr>
+            <td><a href="{$Think.config.member_jump_url}?member_id={$vo.member_id}" target="_blank">{$vo.member_id}</a></td>
+            <td>{$vo.username}</td>
+            <td>{$vo.nickname}</td>
+            <td>{$vo.agentname}</td>
+            <td>
+                剩余金额：<font color="#009688"><?php echo round($vo['balance'],2) ?></font>元
+                <br>
+                冻结金额：<font color="red"><?php echo round($vo['blockedbalance'],2) ?></font>元
+            </td>
+            <td>
+                费率：<font color="#009688">{:bcadd($vo.alipay_rate * 100, 0 , 2)} %</font>
+            </td>
+            <td>
+                费率：<font color="#009688">{:bcadd($vo.wechat_rate * 100, 0 , 2)} %</font>
+            </td>
+            <td>
+                {:date('Y-m-d H:i:s', $vo.create_date)}
+            </td>
+        </tr>
+        {/volist}
+        </tbody>
+    </table>
+    </form>
+    <div class="page">
+        <div>
+            {$page->render()}
+        </div>
+    </div>
+
+</div>
+{/block}
+
+{block name="js"}
+<script>
+    layui.use(['laydate','form'], function(){
+        var laydate = layui.laydate,
+        form = layui.form;
+
+        //执行一个laydate实例
+        laydate.render({
+            elem: '#start', //指定元素
+            type: 'datetime',
+            range: '|' //或 range: '~' 来自定义分割字符
+        });
+
+        //执行一个laydate实例
+        laydate.render({
+            elem: '#end' ,//指定元素
+            type: 'datetime',
+            range: '|' //或 range: '~' 来自定义分割字符
+        });
+
+        //监听指定开关
+        form.on('switch(switchTest)', function(data){
+            var status = this.checked?1:2;
+            var mid = data.value;
+            $.ajax({
+                url: "{:url('member_status')}",
+                type:"POST",
+                data: {
+                    'status':status,
+                    'mid':mid,
+                },
+                success:function(result){
+                    if(result.status == 1){
+                        layer.tips(result.msg, data.othis,{
+                            tips: [4, '#78BA32']
+                        });
+                    }else{
+                        layer.closeAll();
+                        layer.tips(result.msg, data.othis);
+                    }
+                }
+            });
+        });
+
+    });
+
+
+    /*用户-删除*/
+    function member_del(id){
+        layer.confirm('确认删除用户？',function(){
+            $.ajax({
+                url: "{:url('member_del')}",
+                type:"POST",
+                data: {
+                    'mid':id,
+                },
+                success:function(result){
+                    layer.close(layer.index);
+                    if(result.status == 1){
+                        swal("成功!！", result.msg,"success");
+                        setTimeout(function(){
+                            location.reload();
+                        },2000)
+                    }else{
+                        layer.closeAll();
+                        swal('失败', result.msg, "error");
+                    }
+                }
+            });
+        });
+
+    }
+
+</script>
+{/block}

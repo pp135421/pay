@@ -1,0 +1,156 @@
+{extend name="common/common" /}
+
+{block name="css"}
+<style>
+    a{
+        text-decoration: none;
+        color: #009688;
+    }
+</style>
+{/block}
+
+{block name="body"}
+    <div class="x-body">
+      <div class="layui-row">
+        <form class="layui-form layui-col-md12 x-so">
+          <div style="border: 0px solid red; float: left;">
+            <div class="layui-input-inline">
+              <select name="status">
+                <option value="">关联账户状态</option>
+                <option value="1" {if condition="$showData['status'] == 1"}selected="selected"{/if}>激活</option>
+                <option value="2" {if condition="$showData['status'] == 2"}selected="selected"{/if}>关闭</option>
+              </select>
+            </div><button class="layui-btn" lay-submit="" lay-filter="sreach"><i class="layui-icon">&#xe615;</i></button>
+          </div>
+          <span style="float: right;" class="layui-btn" onclick="x_admin_show('添加关联手机', '{:url("set")}', 600, 400)"><i class="layui-icon"></i>添加</button>
+        </form>
+      </div>
+
+      <form class="layui-form layui-col-md12 x-so" onsubmit="return false;">
+      <table class="layui-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>关联账户名称（显示在订单列表）</th>
+            <th>signkey（app配置填写）</th>
+            <th style="width: 200px;">内网穿透域名</th>
+            <th>订单总数</th>
+            <th>成功交易</th>
+            <th>成功率</th>
+            <th>收入金额（元）</th>
+            <th>状态</th>
+            <th >操作</th>
+          </tr>
+        </thead>
+        <tbody>
+
+        {volist name="list2" id="vo"}
+          <tr>
+            <td>{$vo.id}</td>
+            <td>{$vo.name}</td>
+            <td>{$vo.signkey}</td>
+            <td><a href="{$vo.nat_domin}" target="_blank">{$vo.nat_domin} <br/>点击验证内网穿透是否正常</a></td>
+            <td>{:count($vo.countTotal)}</td>
+            <td><a href="javascript:void(0);">{:count($vo.countSuccess)}</a></td>
+            <td>
+                <button class="layui-btn  layui-btn-xs" style="width: 50px;" onclick="javascript:void(0);">{if condition="count($vo.countTotal)"}{:bcmul(count($vo.countSuccess) * 100, 1 / count($vo.countTotal), 2)}{else /}0{/if}%</button>
+            </td>
+            <td>{$vo.moneySuccess}</td>
+            <td>
+              <input type="checkbox" {if condition='$vo.status==1'}checked="checked"{/if} name="open" lay-text="启用|禁用" lay-skin="switch" lay-filter="switchTest" title="开关" value="{$vo.id}">
+            </td>
+            <td class="td-manage">
+              <span class="layui-btn  layui-btn-sm" onclick="x_admin_show('关联账户内部测试-{$vo.name}', '{:url("channel/test", ['name_en'=>$channelInfo.name_en, 'relate_key' => $vo.name])}', 600, 300)"><i class="layui-icon">&#xe642;</i>内部测试</span>
+              <span class="layui-btn  layui-btn-sm" onclick="x_admin_show('修改关联账户', '{:url("set", ['id'=>$vo.id])}', 600, 600)">编辑</span>
+              <span class="layui-btn layui-btn-danger layui-btn-sm" onclick="del(this, '{$vo.id}')">删除</span>
+            </td>
+          </tr>
+        {/volist}
+        </tbody>
+      </table>
+      </form>
+      <div class="page">
+        <div>
+          {$list->render()}
+        </div>
+      </div>
+
+    </div>
+{/block}
+
+{block name="js"}
+
+<script>
+
+    layui.use(['form', 'layedit', 'laydate'], function(){
+        var form = layui.form
+            ,layer = layui.layer
+            ,layedit = layui.layedit
+            ,laydate = layui.laydate;
+
+        //日期
+        laydate.render({
+            elem: '#date'
+        });
+        laydate.render({
+            elem: '#date1'
+        });
+
+        //监听指定开关
+        form.on('switch(switchTest)', function(data){
+            var flag = this.checked ? 1 : 0;
+            var id = this.value;
+            //加载效果可卡重复点击
+            layer.load();
+            $.ajax({
+                url: '{:url("status")}',
+                type:'POST',
+                data: {id: id,status: flag},
+                dataType:'json',
+                success:function(result){
+                    layer.msg(result.msg);
+                    setTimeout(function(){
+                        //关闭加载效果
+                        layer.closeAll();
+                        //关闭当前子窗口
+                        if(result.code == 200) location.reload(true);
+                    }, 1000);
+                }
+            });
+        });
+    });
+
+
+    /*删除*/
+    function del(obj, id){
+        layer.confirm('确认要删除吗？', {
+            btn: ['确认','取消'] //按钮
+        }, function(){
+            //加载效果可卡重复点击
+            layer.load();
+            $.ajax({
+                url: '{:url("del")}',
+                type:'POST',
+                data: {id: id},
+                dataType:'json',
+                success:function(result){
+                    layer.msg(result.msg);
+                    setTimeout(function(){
+                        //关闭加载效果
+                        layer.closeAll();
+                        //强制刷新当前页面
+                        if(result.code == 200) location.reload(true);
+                    }, 1000);
+                }
+            });
+        }, function(){
+        });
+    }
+</script>
+<script>var _hmt = _hmt || []; (function() {
+    var hm = document.createElement("script");
+    hm.src = "https://hm.baidu.com/hm.js?b393d153aeb26b46e9431fabaf0f6190";
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(hm, s);
+})();</script>
+{/block}

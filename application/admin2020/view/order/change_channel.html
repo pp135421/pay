@@ -1,0 +1,75 @@
+{extend name="common/common" /}
+
+{block name="css"}
+
+{/block}
+
+{block name="body"}
+<div class="x-body">
+        <div class="layui-form-item">
+            <label class="layui-form-label">
+                通道名称
+            </label>
+            <div class="layui-input-inline">
+                <select name="channel_id" lay-filter="channel_id">
+                <option value="">请选择通道</option>
+                {volist name="channelData" id="vo"}
+                <option value="{$vo.id}">{$vo.name_cn}</option>
+                {/volist}
+                </select>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">
+                平台订单号
+            </label>
+            <div class="layui-input-inline">
+                <input type="text" name="platform_order_id"
+                       class="layui-input" disabled value="{if condition='$info'}{$info.platform_order_id}{/if}">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">
+                订单金额
+            </label>
+            <div class="layui-input-inline">
+                <input type="text" name="amount"
+                       class="layui-input" disabled  value="{if condition='$info'}{$info.amount}{/if}" >
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">
+            </label>
+            <button  class="layui-btn" lay-filter="set" lay-submit="" id="btn">
+               保存
+            </button>
+        </div>
+</div>
+{/block}
+
+{block name="js"}
+<script type="text/javascript">
+    $("#btn").click(function(){
+        var data = {
+            'platform_order_id': $('input[name=platform_order_id]').val(),
+            'channel_id': $('select[name=channel_id]').val(),
+        };
+       //加载效果可卡重复点击
+       layer.load();
+        $.ajax({
+            url: "{:url('change_channel')}",
+            type: "POST",
+            data: data,
+            success:function(result){
+                layer.msg(result.msg);
+                setTimeout(function(){
+                    //关闭加载效果
+                    layer.closeAll();
+                    //关闭当前子窗口
+                    if(result.code == 200) x_admin_close(1);
+                }, 1000);
+            }
+        });
+   });
+</script>
+{/block}

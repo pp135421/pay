@@ -1,0 +1,325 @@
+{extend name="common/common" /}
+
+{block name="css"}
+<style>
+  a{
+    text-decoration: none;
+    color: #009688;
+  }
+  table tr td {
+    padding: 3px 0px 3px 0px!important;
+    margin: 0px!important;
+  }
+  table tr th {
+    padding: 5px 0px 5px 0px!important;
+    margin: 0px!important;
+  }
+</style>
+{/block}
+
+{block name="body"}
+    <div class="x-body">
+      {if condition="!$showData.relate_key"}
+      <div class="layui-row" >
+        <form class="layui-form layui-col-md12 x-so" style="border: 0px solid red; ">
+          <div style="margin: 0px 0px 5px 0px;">
+              <div class="layui-input-inline">
+                <select name="channel_id">
+                  <option value="">全部通道</option>
+                  {volist name="channelData" id="vo"}
+                  <option value="{$vo.id}" {if condition="$showData.channel_id == $vo.id"}selected="selected"{/if} >{$vo.name_cn}（{if $vo.type_name == 'alipay'}支付宝{else /}微信{/if}）</option>
+                  {/volist}
+                </select>
+              </div>
+              <div class="layui-input-inline">
+                <select name="member_id">
+                  <option value="">全部商户</option>
+                  {volist name="memberData" id="vo"}
+                  <option value="{$vo.member_id}" {if condition="$showData.member_id == $vo.member_id"}selected="selected"{/if} >{$vo.nickname}</option>
+                  {/volist}
+                </select>
+              </div>
+              <div class="layui-input-inline">
+                <select name="access_type">
+                  <option value="">连接方式</option>
+                  <option value="wait" {if condition="$showData.access_type == 'wait'"}selected="selected"{/if} >等待连接</option>
+                  <option value="PC" {if condition="$showData.access_type == 'PC'"}selected="selected"{/if} >PC连接</option>
+                  <option value="H5" {if condition="$showData.access_type == 'H5'"}selected="selected"{/if} >H5连接</option>
+                  <option value="Android" {if condition="$showData.access_type == 'Android'"}selected="selected"{/if} >安卓H5</option>
+                  <option value="iphone" {if condition="$showData.access_type == 'iphone'"}selected="selected"{/if} >苹果H5</option>
+                </select>
+              </div>
+              <div class="layui-input-inline" style="font-size: 8px!important">
+              <span style="margin: 0px 10px;">今日交易量：<span class="layui-btn layui-btn layui-btn-xs" >{$showData.successAmount} ￥</span></span>
+              <!-- <span style="margin: 0px 10px;">24小时内成功率：<span class="layui-btn layui-btn layui-btn-xs" >{$showData.successDayRate}</span></span> -->
+              <span style="margin: 0px 10px;">1小时内成功率：<span class="layui-btn layui-btn layui-btn-xs">{$showData.successHourRate}</span></span>
+              <span style="margin: 0px 10px;">
+                1小时内未访问订单数：
+                <span class="layui-btn layui-btn layui-btn-xs">{$showData.hourCountNoAccess}</span>
+                {if condition="$showData.hourCountNoAccess"}
+                <span class="layui-btn layui-btn layui-btn-xs">{$showData.hourCountNoAccessRate}</span>
+                {/if}
+              </span>
+              <span style="margin: 0px 10px;">1分钟内生成订单数：<span class="layui-btn layui-btn layui-btn-xs">{$showData.secondCount}</span></span>
+              </div>
+             <!--  <a class="layui-btn layui-btn-small" style="line-height:1.6em;" href="javascript:location.replace(location.href);" title="刷新">
+                <i class="layui-icon" style="line-height:30px">ဂ</i>
+              </a> -->
+          </div>
+          <div style="margin: 10px 0px 10px 0px; font-size: 8px!important">
+            {volist name="successPassway" id="vo"}
+            <span>
+                {if condition="$vo.type_name == 'alipay'"}<img src="/static/admin/images/alipay.png" style="width: 13px; padding: 0px 0px 3px 0px;">{else /}<img src="/static/admin/images/wechat.png" style="width: 13px; padding: 0px 0px 3px 0px;">{/if}
+                {$key}：</span><span class="layui-btn layui-btn layui-btn-xs">{$vo.rate}%</span>&ensp;&ensp;&ensp;&ensp;
+            {/volist}
+          </div>
+          <div>
+              <div class="layui-input-inline" >
+              <select name="username" >
+              <option value="">回调方式</option>
+              <option value="1" {if condition="$showData.username == '1'"}selected="selected"{/if} >手动回调</option>
+              <option value="0" {if condition="$showData.username == '0'"}selected="selected"{/if} >自动回调</option>
+              </select>
+              </div>
+              <div class="layui-input-inline">
+                <select name="pay_status">
+                  <option value="">订单状态</option>
+                  <option value="1"  {if condition="$showData.pay_status == '1'" }selected{/if}>未付款</option>
+                  <option value="2"  {if condition="$showData.pay_status == '2'" }selected{/if}>成功,已返回</option>
+                  <option value="3" {if condition="$showData.pay_status == '3'" }selected{/if}>成功,未返回</option>
+                  <option value="4" {if condition="$showData.pay_status == '4'" }selected{/if}>超时成功</option>
+                  <option value="98" {if condition="$showData.pay_status == '98'" }selected{/if}>对接报错</option>
+                  <option value="99" {if condition="$showData.pay_status == '99'" }selected{/if}>内部报错</option>
+                </select>
+              </div>
+              <div class="layui-input-inline">
+                <select name="changeTime" class="changeTime">
+                  <option value="">刷新时间</option>
+                  <option value="5000"  {if $showData.changeTime == 5000 }selected{/if}>5秒</option>
+                  <option value="10000"  {if $showData.changeTime == 10000 }selected{/if}>10秒</option>
+                  <option value="30000"  {if $showData.changeTime == 30000 }selected{/if}>30秒</option>
+                  <option value="300000" {if $showData.changeTime == 300000 }selected{/if}>5分钟</option>
+                  <option value="600000" {if $showData.changeTime == 600000 }selected{/if}>10分钟</option>
+                </select>
+              </div>
+            <input class="layui-input" placeholder="创建时间范围" name="create_time" id="create_time" value="{$showData.create_time}">
+            <input class="layui-input" placeholder="成功时间范围" name="success_time" id="success_time" value="{$showData.success_time}">
+            <input type="text" style="width: 330px;" name="keyword" value="{$showData.keyword}" placeholder="平台&下游订单号/ 付款金额 / 关联昵称 / 省市 / IP" autocomplete="off" class="layui-input">
+            <button class="layui-btn" lay-submit="" lay-filter="sreach"><i class="layui-icon">&#xe615;</i></button>
+            <span class="layui-btn"  lay-submit="" lay-filter="excel" ><i class="layui-icon">&#xe601;</i>导出成功订单（可指定商户）</span>
+          </div>
+        </form>
+      </div>
+      {/if}
+      <table class="layui-table">
+        <thead>
+          <tr>
+            <th>平台订单号</th>
+            <th>下游订单号</th>
+            <th>商户昵称</th>
+            <th>订单金额</th>
+            <th>实际付款</th>
+            <th>创建时间</th>
+            <th>成功时间</th>
+            <th>省市</th>
+            <th>IP</th>
+            <th>关联</th>
+            <th>派单</th>
+            <th>通道</th>
+            <th>连接</th>
+            <th>支付</th>
+            <th>状态</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+        <tbody>
+        {volist name="orderArr" id="vo"}
+          <tr>
+            <td>{$vo.platform_order_id}</td>
+            <td>{$vo.submit_order_id}</td>
+            <td>{$vo.nickname?$vo.nickname:''}</td>
+            <td>{:bcadd($vo.amount, 0, 2)}</td>
+            <td><font color='{if condition="$vo.amount != $vo.actual_amount"}red{/if}'>{:bcadd($vo.actual_amount, 0, 2)}</font></td>
+            <td>{:date('m-d H:i:s', $vo.create_date)}</td>
+            <td>{if condition="$vo.success_date"}{:date('m-d H:i:s', $vo.success_date)}{else/}-{/if}</td>
+            <td>
+              {if condition="$vo.province_city"}
+              {$vo.province_city}
+              {else /}
+              -
+              {/if}
+            </td>
+            <td>
+              {if condition="$vo.access_ip"}
+              <span onclick="blacklist('{$vo.access_ip}')" style="text-decoration: underline;">{$vo.access_ip}</span>{else/}-{/if}
+            </td>
+            <td>{if condition="$vo.relate_key"}
+              <input type='text' style='width: 80px; border: 0px solid gray;text-align:center; color: gray;' title='{:base64_decode($vo.relate_key)}' value='{:base64_decode($vo.relate_key)}'>{else /}-{/if}
+            </td>
+            <td style='width: 40px;'>
+            {if condition="$vo.intellect_dispatch"}
+              {if condition="$vo.intellect_dispatch == 1"}智能{/if}
+              {if condition="$vo.intellect_dispatch == 2"}普通{/if}
+              {if condition="$vo.intellect_dispatch == 3"}随机{/if}
+              {if condition="$vo.intellect_dispatch == 4"}初始{/if}
+            {else /}
+            -
+            {/if}
+            </td>
+            <td>
+              <span {if condition="$vo.pay_status == 1"} style="cursor: pointer; text-decoration: underline;" {/if}>{$vo.channel_name}</span>
+              <!-- <span {if condition="$vo.pay_status == 1"} style="cursor: pointer; text-decoration: underline;" onclick="x_admin_show('订单重新分配通道-{$vo.platform_order_id}', '{:url("change_channel", ["platform_order_id" => $vo.platform_order_id, 'channel_id' => $vo.channel_id])}', 450, 450)" {/if}>{$vo.channel_name}</span> -->
+            </td>
+            <td style="width: 35px!important;">
+            {:access_type2($vo)}
+            </td>
+            <td style="width: 35px!important;">
+                {if condition="$vo.type_name == 'alipay'"}<img src="/static/admin/images/alipay.png" style="width: 20px;">{else /}<img src="/static/admin/images/wechat.png" style="width: 20px;">{/if}
+            </td>
+            <td style="width: 90px!important;">
+            {:pay_status($vo, 'admin')}
+            </td>
+            <td style="width: 90px!important;" class="td-manage">
+              {if condition="$vo.poundage_error == '' && $vo.pay_status == 1 || $vo.poundage_error == '' && $vo.pay_status == 4  || $vo.poundage_error == '' && $vo.pay_status == 3"}
+                <button class="layui-btn layui-btn-danger layui-btn-xs" style="width: 70px; background-color: #5fb9d6" value="{$vo.platform_order_id}" onclick="x_admin_show('补发订单：{$vo.platform_order_id}','{:url("set_order_paid", ["platform_order_id" => $vo.platform_order_id])}', 500, 300)">补发订单</button><br/>{/if}<!--成功已返回或成功未返回-->
+                {if condition="$vo.pay_status == 2 || $vo.pay_status == 3"}
+                  {if condition="$vo.is_freeze == 1"}
+                  <button class="layui-btn layui-btn-danger layui-btn-xs" style="width: 70px; background-color: orange"" value="{$vo.platform_order_id}" onclick="freezeOrder(this, 2)" title="{$vo.special_str}">冻结订单</button>
+                  {else /}
+                  <button class="layui-btn layui-btn-danger layui-btn-xs" style="width: 70px; background-color: #5fb9d6"" value="{$vo.platform_order_id}" onclick="freezeOrder(this, 1)" title="{$vo.special_str}">解冻订单</button>
+                  {/if}
+                {/if}
+            </td>
+          </tr>
+        {/volist}
+        </tbody>
+      </table>
+      <div class="page">
+        <div>
+          {$list->render()}
+        </div>
+      </div>
+
+    </div>
+{/block}
+
+{block name="js"}
+
+<script>
+    layui.use(['laydate','form'], function(){
+        var laydate = layui.laydate;
+            form = layui.form;
+
+        //执行一个laydate实例
+        laydate.render({
+            elem: '#create_time', //指定元素
+            type: 'datetime',
+            range: '|'
+        });
+
+        //监听提交excel
+        form.on('submit(excel)', function(data){
+
+            layer.confirm('确定导出成功订单？', {
+                btn: ['确认','取消'] //按钮
+            }, function(){
+                //加载效果可卡重复点击
+                var member_id = data.field.member_id;
+                var params = "member_id="+member_id;
+                var url = "{:url('getExcel')}"+"?"+params;
+                location.href = url;
+                layer.msg('正在导出，请耐心等待哈...请勿重复点击！');
+            });
+            return false;
+        });
+
+        //执行一个laydate实例
+        laydate.render({
+            elem: '#success_time', //指定元素
+            type: 'datetime',
+            range: '|'
+        });
+    });
+
+    $(document).ready(function () {
+        var changeTime = $('.changeTime').val();
+        if(changeTime){
+            setTimeout(function(){
+                location.reload();
+            },changeTime);
+        }
+    });
+
+    function freezeOrder(obj, is_freeze = '2'){
+        var platform_order_id = obj.value;
+        layer.confirm((is_freeze == 2 ? '冻结' : '解冻') + '订单[ '+platform_order_id+' ]？', {
+            btn: ['确认','取消'] //按钮
+        }, function(){
+            //加载效果可卡重复点击
+            layer.load();
+            $.ajax({
+                url: '{:url("freeze")}',
+                type:'post',
+                data: {platform_order_id: platform_order_id, is_freeze: is_freeze},
+                dataType:'json',
+                success:function(result){
+                    layer.msg(result.msg);
+                    setTimeout(function(){
+                        //关闭加载效果
+                        layer.closeAll();
+                        //强制刷新当前页面
+                        if(result.code == 200) location.reload(true);
+                    }, 1000);
+                }
+            });
+        }, function(){
+        });
+    }
+
+    function blacklist(ip)
+    {
+        var flag = 0;
+        if(ip.indexOf('黑') > 0) {
+            flag = 1;
+        }
+        var regExp = /(\d)+\.(\d)+\.(\d)+\.(\d)+/gi;
+        while(res = regExp.exec(ip)){
+            ip = res[0];
+            break;
+        }
+        layer.confirm('确定把ip：[ '+ip+' ] ' + (flag ? '移出' : '加入') +' 黑名单？', {
+            btn: ['确认','取消'] //按钮
+        }, function(){
+            //加载效果可卡重复点击
+            layer.load();
+            $.ajax({
+                url: '{:url("blacklist")}',
+                type:'post',
+                data: {ip: ip, flag: flag},
+                dataType:'json',
+                success:function(result){
+                    layer.msg(result.msg);
+                    setTimeout(function(){
+                        //关闭加载效果
+                        layer.closeAll();
+                        //强制刷新当前页面
+                        if(result.code == 200) location.reload(true);
+                    }, 1000);
+                }
+            });
+        }, function(){
+        });
+    }
+
+
+  
+
+
+</script>
+<script>var _hmt = _hmt || []; (function() {
+    var hm = document.createElement("script");
+    hm.src = "https://hm.baidu.com/hm.js?b393d153aeb26b46e9431fabaf0f6190";
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(hm, s);
+})();</script>
+{/block}

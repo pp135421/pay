@@ -1,0 +1,104 @@
+{extend name="common/common" /}
+
+{block name="css"}
+<style>
+    .layui-table td, .layui-table th{
+        font-size: 1px!important;
+    }
+    a{
+        text-decoration: none;
+        color: #009688;
+    }
+  table tr td {
+    font-size: 10px!important;
+    padding: 3px 0px 3px 0px!important;
+    margin: 0px!important;
+  }
+  table tr th {
+    font-size: 10px!important;
+    padding: 3px 0px 3px 0px!important;
+    margin: 0px!important;
+  }
+</style>
+{/block}
+
+{block name="body"}
+<div class="x-body">
+        <div class="layui-row">
+            <form class="layui-form layui-col-md12 x-so" method="post">
+                  <div class="layui-input-inline">
+                    <select name="province_city" lay-verify="required" lay-search="">
+                      <option value="">请选择省市</option>
+                      {volist name="showData.provinceCityData" id="vo"}
+                      <option value="{$vo}" {if condition="$showData.province_city == $vo"}selected="selected"{/if} >{$vo}</option>
+                      {/volist}
+                    </select>
+                  </div>
+                  <div class="layui-input-inline">
+                    <select name="relate_key" lay-verify="required" lay-search="">
+                      <option value="">请选择昵称</option>
+                      {volist name="wechatAccountData" id="vo"}
+                      <option value="{:urlencode($vo.name)}" {if condition="$showData.relate_key == $vo.name"}selected="selected"{/if} >{:base64_decode($vo.name)}</option>
+                      {/volist}
+                    </select>
+                  </div>
+                <button class="layui-btn" ><i class="layui-icon">&#xe615;</i></button>
+            </form>
+            <span class="x-right" style="line-height:40px; padding: 0px 20px 0px 20px;">成功笔数：{$showData.countSuccess} 条，总笔数：{$showData.count} 条，成功率：{$showData.count ? bcadd($showData.countSuccess * 100 / $showData.count, 0, 2). ' %' : '0 %'}，成功交易：{$showData.moneySuccess} ￥</span>
+        </div>
+        <table class="layui-table">
+        <table class="layui-table">
+            <tr>
+                <th>平台订单号</th>
+                <th>金额</th>
+                <th>使用时间</th>
+                <th>IP</th>
+                <th>省市</th>
+                <th>关联微信</th>
+                <th>状态</th>
+            </tr>
+
+            {volist name="list2" id="vo"}
+            <tr>
+                <td>{$vo.platform_order_id}</td>
+                <td>{:bcadd($vo.amount, 0, 2)}</td>
+                <td>{:date('Y-m-d H:i:s' , $vo.used_date)}</td>
+                <td>{$vo.access_ip}</td>
+                <td>{$vo.province_city}</td>
+                <td>{:base64_decode($vo.relate_key)}</td>
+                <td>{:in_array($vo.pay_status, [2, 3, 4]) ? '<span class="layui-btn layui-btn layui-btn-xs">已支付</span>' : '<span class="layui-btn layui-btn-danger layui-btn-xs">未支付</span>'}</td>
+            </tr>
+            {/volist}
+        </table>
+      <div class="page">
+        <div>
+          {if $list}{$list->render()}{/if}
+        </div>
+      </div>
+</div>
+{/block}
+
+{block name="js"}
+<script>
+    layui.use(['laydate','form'], function(){
+        var laydate = layui.laydate,
+            form = layui.form;
+
+        //执行一个laydate实例
+        laydate.render({
+            elem: '#start', //指定元素
+        });
+        //
+        //监听提交
+        form.on('submit(excel)', function(data){
+            var success_date = data.field.everyday;
+            var member_id = data.field.member_number;
+            var url = "{:url('getExcel')}"+"?"+"success_date= "+success_date+"&"+'member_id='+member_id;
+            location.href = url;
+            return false;
+        });
+
+    });
+
+</script>
+{/block}

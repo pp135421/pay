@@ -1,0 +1,147 @@
+{extend name="common/common" /}
+
+{block name="css"}
+<style>
+    a{
+        text-decoration: none;
+        /*color: #009688;*/
+    }
+</style>
+{/block}
+
+{block name="body"}
+<div class="x-body">
+    <div class="layui-row">
+        <form class="layui-form layui-col-md12 x-so" method="POST">
+            <input type="text" name="card_number"  placeholder="银行卡号" autocomplete="off" style="width: 200px;" class="layui-input" value="{$card_number}">
+            <input type="text" name="account"  placeholder="开户人" autocomplete="off" class="layui-input" value="{$account}">
+            <button class="layui-btn"  lay-submit="" lay-filter="sreach"><i class="layui-icon">&#xe615;</i></button>
+            <span class="x-right layui-btn" onclick="x_admin_show('添加银行卡','{:url("bank_edit")}', 500, 500)">添加</span>
+        </form>
+    </div>
+    <form class="layui-form" action="">
+        <table class="layui-table">
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>银行名称</th>
+                <th>支行名称</th>
+                <th>开户人</th>
+                <th>银行卡号</th>
+                <th>省份</th>
+                <th>城市</th>
+                <th>状态</th>
+                <th>操作</th>
+            </tr>
+            </thead>
+            <tbody>
+            {volist name="list" id="vo"}
+            <tr>
+                <td>{$key+1}</td>
+                <td>{$vo.bankname}</td>
+                <td>{$vo.bankzhiname}</td>
+                <td>{$vo.bank_account}</td>
+                <td>{$vo.card_number}</td>
+                <td>{$vo.province}</td>
+                <td>{$vo.city}</td>
+                <td>
+                    {if condition="$vo.status == 1"}
+                    <input type="checkbox" name="status" checked="" lay-skin="switch"  lay-filter="switchTest" lay-text="开启|禁用" value="{$vo.id}">
+                    {else/}
+                    <input type="checkbox" name="status" lay-skin="switch"  lay-filter="switchTest" lay-text="开启|禁用" value="{$vo.id}">
+                    {/if}
+                </td>
+                <td class="td-manage">
+                    <span class="layui-btn layui-btn-xs" onclick="x_admin_show('银行卡编辑','{:url("bank_edit",["bank_id"=>$vo.id])}', 500, 500)"><i class="layui-icon">&#xe642;</i>编辑</span>
+                    <span class="layui-btn layui-btn-danger layui-btn-xs" onclick="member_del({$vo.id})"> <i class="layui-icon">&#xe640;</i>删除</span>
+                </td>
+            </tr>
+            {/volist}
+            </tbody>
+        </table>
+    </form>
+    <div class="page">
+        <div>
+            {$list->render()}
+        </div>
+    </div>
+
+
+</div>
+{/block}
+
+{block name="js"}
+<script>
+    layui.use(['laydate','form'], function(){
+        var laydate = layui.laydate,
+            form = layui.form;
+
+        //执行一个laydate实例
+        laydate.render({
+            elem: '#start', //指定元素
+            type: 'datetime',
+            range: '|' //或 range: '~' 来自定义分割字符
+        });
+
+        //执行一个laydate实例
+        laydate.render({
+            elem: '#end' ,//指定元素
+            type: 'datetime',
+            range: '|' //或 range: '~' 来自定义分割字符
+        });
+
+        //监听指定开关
+        form.on('switch(switchTest)', function(data){
+            var status = this.checked?1:2;
+            var bank_id = data.value;
+            $.ajax({
+                url: "{:url('bank_status')}",
+                type:"POST",
+                data: {
+                    'status':status,
+                    'bank_id':bank_id,
+                },
+                success:function(result){
+                    if(result.status == 1){
+                        layer.tips(result.msg, data.othis,{
+                            tips: [4, '#78BA32']
+                        });
+                    }else{
+                        layer.closeAll();
+                        layer.tips(result.msg, data.othis);
+                    }
+                }
+            });
+        });
+
+    });
+
+
+    /*用户-删除*/
+    function member_del(id){
+        layer.confirm('确认删除此银行卡？',function(){
+            $.ajax({
+                url: "{:url('bank_del')}",
+                type:"POST",
+                data: {
+                    'id':id,
+                },
+                success:function(result){
+                    layer.close(layer.index);
+                    if(result.status == 1){
+                        swal("成功!！", result.msg,"success");
+                        setTimeout(function(){
+                           location.reload();
+                        },2000)
+                    }else{
+                        layer.closeAll();
+                        swal('失败', result.msg, "error");
+                    }
+                }
+            });
+        });
+
+    }
+
+</script>
+{/block}

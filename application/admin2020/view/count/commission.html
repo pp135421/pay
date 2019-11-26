@@ -1,0 +1,84 @@
+{extend name="common/common" /}
+
+{block name="css"}
+<style>
+    .layui-table td, .layui-table th{
+        font-size: 1px!important;
+    }
+    a{
+        text-decoration: none;
+        color: #009688;
+    }
+</style>
+{/block}
+
+{block name="body"}
+<div class="x-body">
+    <div class="layui-row">
+
+        <form class="layui-form layui-col-md12 x-so" method="post">
+            <input type="text" name="success_date"  placeholder="交易月份（不能出现日）" autocomplete="off" class="layui-input" value="{$showData.success_date}">
+            <button class="layui-btn" ><i class="layui-icon">&#xe615;</i></button>
+        </form>
+    </div>
+    <form class="layui-form" action="">
+        <table class="layui-table" style="">
+            <thead>
+            <tr>
+                <th>交易日期</th>
+                <th>内部通道交易金额（￥）</th>
+                <th>外部通道交易金额（￥）</th>
+                <th>所有通道交易金额（￥）</th>
+                <th>内部通道抽成金额（￥ * 1.5‰）</th>
+                <th>外部通道抽成金额（￥ * 0.5‰）</th>
+                <th>所有通道抽成金额（￥）</th>
+            </tr>
+            </thead>
+            <tbody>
+            {volist name="moneyData" id="vo"}
+            <tr {if condition="date('Y-m-d')==$vo.day"}style="background-color: #e9f9fd;"{/if}>
+                <th><font size="2px" color="#009688">{$vo.day}</font></th>
+                <th>{:bcadd($vo.innerMoney, 0, 2)}</th>
+                <th>{:bcadd($vo.outMoney, 0, 2)}</th>
+                <th>{:bcadd($vo.innerMoney + $vo.outMoney, 0, 2)}</th>
+                <th>{:bcadd($vo.innerMoney * 1500 / 1000000, 0, 2)}</th>
+                <th>{:bcadd($vo.outMoney * 500 / 1000000, 0, 2)}</th>
+                <th>
+                    {if condition="($vo.innerMoney * 1500 / 1000000 + $vo.outMoney * 500 / 1000000) > 1"}
+                    <span style="width: 80px;" class="layui-btn {if condition='$key==0'}layui-btn-normal{/if} layui-btn-xs">{:bcadd($vo.innerMoney * 1500 / 1000000 + $vo.outMoney * 500 / 1000000, 0, 2)}</span>
+                    {else /}
+                    <span style="width: 80px;" class="layui-btn  layui-btn-{if condition='$key==0'}normal{else /}danger{/if} layui-btn-xs">0.00</span>
+                    {/if}
+                </th>
+            </tr>
+            {/volist}
+            </tbody>
+        </table>
+    </form>
+</div>
+{/block}
+
+{block name="js"}
+<script>
+    layui.use(['laydate','form'], function(){
+        var laydate = layui.laydate,
+            form = layui.form;
+
+        //执行一个laydate实例
+        laydate.render({
+            elem: '#start', //指定元素
+        });
+        //
+        //监听提交
+        form.on('submit(excel)', function(data){
+            var success_date = data.field.everyday;
+            var member_id = data.field.member_number;
+            var url = "{:url('getExcel')}"+"?"+"success_date= "+success_date+"&"+'member_id='+member_id;
+            location.href = url;
+            return false;
+        });
+
+    });
+
+</script>
+{/block}

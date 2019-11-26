@@ -1,0 +1,129 @@
+{extend name="common/common" /}
+{block name="css"}
+<style>
+    a{
+        text-decoration: none;
+        color: #009688;
+    }
+</style>
+{/block}
+{block name="body"}
+<div class="x-body">
+    <xblock>
+        <button class="layui-btn" onclick="x_admin_show('添加管理（初始密码默认：123456）','{:url("set")}', 500, 500)"><i class="layui-icon"></i>添加</button>
+        <span class="x-right" style="line-height:40px">共有数据：{$count} 条</span>
+        <a class="layui-btn layui-btn-small" style="line-height:1.6em;" href="javascript:location.replace(location.href);" title="刷新">
+            <i class="layui-icon" style="line-height:30px">ဂ</i></a>
+    </xblock>
+    <table class="layui-table layui-form">
+        <thead>
+            <th>管理账户</th>
+            <th>当前角色</th>
+            <th>租用账户</th>
+            <th>租用费率</th>
+            <th>指定通道</th>
+            <th>添加时间</th>
+            <th>IP</th>
+            <th>初始密码</th>
+            <th>状态</th>
+            <th>操作</th>
+        </thead>
+        <tbody>
+        {volist name="list2" id="vo"}
+        <tr>
+            <td>{$vo.username}</td>
+            <td>{$vo.rolename}</td>
+            <td>{$vo.is_inner == 1 ? '<span class="layui-btn layui-btn-sm">是</span>' : '<span class="layui-btn layui-btn-danger  layui-btn-sm">否</span>'}</td>
+            <td>{:bcadd($vo.rent_rate * 100, 0, 2)} %</td>
+            <td>{if condition="$vo.channel_name_en"}{$vo.channel_name_en}_{:bcadd($vo.channel_rate * 100, 0, 2)} %{else /}-{/if}</td>
+            <td>{:date('Y-m-d H:i:s', $vo.create_date)}</td>
+            <td>{$vo.ip}（{:ip_to_city($vo.ip)}）</td>
+            <td>{if condition="$vo.noDanger"}<span class="layui-btn layui-btn-sm">已修改</span>{else /}<span class="layui-btn layui-btn-danger  layui-btn-sm">未修改</span>{/if}</td>
+            <td>
+                <input type="checkbox" {if condition='$vo.status==1'}checked="checked"{/if} name="open" lay-text="启用|禁用" lay-skin="switch" lay-filter="switchTest" title="开关" value="{$vo.id}">
+            </td>
+            <td class="td-manage">
+                <button class="layui-btn  layui-btn-sm"  onclick="x_admin_show('编辑管理', '{:url("set", ["id" => $vo.id])}', 500, 500)"><i class="layui-icon">&#xe642;</i>编辑</button>
+                <span class="layui-btn layui-btn-danger layui-btn-sm" onclick="del(this, '{$vo.id}')"><i class="layui-icon">&#xe640;</i>删除</span>
+            </td>
+            </td>
+        </tr>
+        {/volist}
+        </tbody>
+    </table>
+    <div class="page">
+        <div>
+            {$list->render()}
+        </div>
+    </div>
+</div>
+
+{/block}
+{block name="js"}
+<script>
+    layui.use(['form', 'layedit', 'laydate'], function(){
+        var form = layui.form
+            ,layer = layui.layer
+            ,layedit = layui.layedit
+            ,laydate = layui.laydate;
+
+        //日期
+        laydate.render({
+            elem: '#date'
+        });
+        laydate.render({
+            elem: '#date1'
+        });
+
+        //监听指定开关
+        form.on('switch(switchTest)', function(data){
+            var flag = this.checked ? 1 : 0;
+            var id = this.value;
+            //加载效果可卡重复点击
+            layer.load();
+            $.ajax({
+                url: '{:url("status")}',
+                type:'POST',
+                data: {id: id,status: flag},
+                dataType:'json',
+                success:function(result){
+                    layer.msg(result.msg);
+                    setTimeout(function(){
+                        //关闭加载效果
+                        layer.closeAll();
+                        //强制刷新当前页面
+                        if(result.code == 200) location.reload(true);
+                    }, 1000);
+                }
+            });
+        });
+    });
+
+
+    /*删除*/
+    function del(obj, id){
+        layer.confirm('确认要删除吗？', {
+            btn: ['确认','取消'] //按钮
+        }, function(){
+            //加载效果可卡重复点击
+            layer.load();
+            $.ajax({
+                url: '{:url("del")}',
+                type:'POST',
+                data: {id: id},
+                dataType:'json',
+                success:function(result){
+                    layer.msg(result.msg);
+                    setTimeout(function(){
+                        //关闭加载效果
+                        layer.closeAll();
+                        //强制刷新当前页面
+                        if(result.code == 200) location.reload(true);
+                    }, 1000);
+                }
+            });
+        }, function(){
+        });
+    }
+</script>
+{/block}

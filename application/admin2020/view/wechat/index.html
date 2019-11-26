@@ -1,0 +1,379 @@
+{extend name="common/common" /}
+
+{block name="css"}
+<style>
+  a{
+    text-decoration: none;
+    color: #009688;
+  }
+  table tr td {
+    padding: 2px!important;
+    margin: 0px!important;
+  }
+</style>
+{/block}
+
+{block name="body"}
+    <div class="x-body">
+      {if condition="$showData.pid && $showData.name != '-'"}
+      <div class="layui-row">
+        <form class="layui-form layui-col-md12 x-so">
+          <div style="border: 0px solid red; float: left;">
+            <input class="layui-input" style="width: 300px;" placeholder="创建订单时间范围" name="create_time" id="create_time" value="{$showData.create_time}">
+            <div class="layui-input-inline">
+                <select name="orderBy">
+                <option value="used_date" {if condition="$showData.orderBy == 'used_date'" }selected{/if}>最近使用时间</option>
+                <option value="create_date" {if condition="$showData.orderBy == 'create_date'" }selected{/if}>账户创建时间</option>
+                <option value="countSuccess" {if condition="$showData.orderBy == 'countSuccess'" }selected{/if}>成功次数</option>
+                <option value="successRate" {if condition="$showData.orderBy == 'successRate'" }selected{/if}>今日成功率</option>
+                <option value="curSuccessRate" {if condition="$showData.orderBy == 'curSuccessRate'" }selected{/if}>最近3笔成功率</option>
+                </select>
+            </div>
+            <div class="layui-input-inline">
+              <select name="status">
+                <option value="">微信启用状态</option>
+                <option value="1" {if condition="$showData.status == 1"}selected="selected"{/if}>启用</option>
+                <option value="2" {if condition="$showData.status == 2"}selected="selected"{/if}>禁用</option>
+              </select>
+            </div>
+            <div class="layui-input-inline">
+              <select name="is_unusual">
+                <option value="">微信异常状态</option>
+                <option value="1" {if condition="$showData.is_unusual == 1"}selected="selected"{/if}>异常</option>
+                <option value="2" {if condition="$showData.is_unusual == 2"}selected="selected"{/if}>正常</option>
+              </select>
+            </div>
+            <div class="layui-input-inline">
+                <select name="pid">
+                <option value="-">请选择店员</option>
+                {volist name="dianyuanName" id="vo"}
+                <option value="{$vo.id}" {if condition="$vo.id == $showData.pid" }selected{/if}>{$vo.account}（{:base64_decode($vo.name)}）</option> {/volist}
+                </select>
+            </div>
+            <input class="layui-input" placeholder="搜索店长" name="name"  value="{$showData.name}">
+            <button class="layui-btn" lay-submit="" lay-filter="sreach"><i class="layui-icon">&#xe615;</i></button>
+          </div>
+          <span style="float: right; margin: 0px 10px;" class="layui-btn layui-btn-sm" onclick="x_admin_show('添加微信', '{:url("set")}', 700, 500)"><i class="layui-icon"></i>添加店员</span>
+          <span style="float: right;" class="layui-btn layui-btn-sm" onclick="x_admin_show('修改配置', '{:url("set_config")}')">修改配置</span>
+        </form>
+      </div>
+      <div>
+        <span style="margin: 0px 10px;">
+          <span class="layui-btn layui-btn-danger layui-btn-sm" style='background-color: #009688;'>
+            关联微信：{if condition="$list2"}{:bcadd(array_sum(array_column($list2, 'moneySuccess')), 0, 2)} ￥（总订单：{:bcadd($showData.orderSuccessMoney, 0, 2)} ￥）{else /}0.00{/if}
+          </span>
+        </span>
+        <span class="layui-btn layui-btn-normal layui-btn-sm" onclick="x_admin_show('收款店员列表', '{:url("index", ['pid' => 0])}')">收款店员列表（{$showData.dianyuanNameCount}）</span>
+        <span class="layui-btn layui-btn-danger layui-btn-sm" onclick="x_admin_show('收款店员列表', '{:url("index", ['name' => '-'])}')">未填写昵称店长列表（{$showData.noNameCount}）</span>
+        <span class="layui-btn layui-btn-danger layui-btn-sm" style="background-color: gray;" onclick="x_admin_show('收款店员列表', '{:url("notify_name")}')">微信昵称表（可删除回调里的无用昵称）</span>
+        <span style="color: gray;">（订单笔数不计入金额小于1块的订单）</span>
+        <span class="x-right" style="line-height:40px; padding: 0px 20px 0px 20px;">共有数据：{$showData.count} 条，启用：{$showData.countOpen} 条，禁用：{$showData.countClose} 条，异常：{$showData.isUnusualCount} 条</span>
+      </div>
+      {else /}
+      <a class="layui-btn layui-btn-small" style="line-height:1.6em;" href="javascript:location.replace(location.href);" title="刷新">
+        <i class="layui-icon" style="line-height:30px">ဂ</i>
+      </a>
+      {/if}
+      <form class="layui-form layui-col-md12 x-so">
+      <table class="layui-table">
+        <thead>
+          <tr>
+            <th><input type="checkbox" name="wechat_id" lay-skin="primary" lay-filter="wechat_id" value=""></th>
+            <th>
+              {if condition="$showData.pid"}
+              <span style="margin: 2px 0px;" class="layui-btn layui-btn-xs" onclick="multiOperate(1)">批量启用</span><br/>
+              <span class="layui-btn layui-btn-danger layui-btn-xs" onclick="multiOperate(2)">批量禁用</span>
+              {/if}
+            </th>
+            <th>归属</th>
+            <th>账户</th>
+            <th>昵称</th>
+            <th>-</th>
+            <th>类型</th>
+            <th>成功</th>
+            <th>总数</th>
+            <th>成功率</th>
+            <th>最近3笔</th>
+            <th>收入 ￥</th>
+            <th>日限额</th>
+            <th>创建时间 {if condition="$showData.orderBy == 'create_date'"}<span style="color: red; font-size: 20px; font-weight: bold;">↓</span>{/if}
+            </th>
+            <th>最近使用 {if condition="$showData.orderBy == 'used_date'"}<span style="color: red;  font-size: 20px;font-weight: bold;">↓</span>{/if}
+            </th>
+            <th>
+              <span class="layui-btn layui-btn-danger layui-btn-xs" onclick="multiDelete()">批量删除</span>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+
+        {volist name="list2" id="vo"}
+          <tr>
+            <td style="width: 15px;"><input type="checkbox" name="wechat_id" lay-skin="primary" value="{$vo.id}"></td>
+            <td>
+              {if condition="$vo.pid && $vo.name"}
+              <input type="checkbox" {if condition='$vo.status==1'}checked="checked"{/if} name="open" lay-text="启用|禁用" lay-skin="switch" lay-filter="switchTest" title="开关" value="{$vo.id}">
+              {/if}
+            </td>
+            <td>
+            {if condition="$vo.dianyuanAccount"}
+              {$vo.dianyuanAccount}
+            {else /}
+            -
+              <!-- <span class="layui-btn layui-btn-normal layui-btn-xs" onclick="x_admin_show('{:base64_decode($vo.name)}-关联店长微信账户', '{:url("index", ['name' => $vo.name])}')">查看店长</span> -->
+            {/if}
+            </td>
+            <td style="width: 100px;">{$vo.account}</td>
+            <td style="width: 100px;">
+              <span style="text-decoration: underline; cursor: pointer; color: #009688;" onclick="x_admin_show('微信：（{:base64_decode($vo.name)}）的总订单表（所有时间）', '{:url("order/index", ['relate_key' => urlencode($vo.name)])}')" title="{$vo.name}">{:base64_decode($vo.name)}</span>{if condition="$vo.is_unusual == 1"}<span style="color: red;"><br/>（异常）</span>{/if}
+            </td>
+            <td>
+              {if condition="$vo.url"}
+              <img width="20" src="{$vo.img_path}" onmouseover="this.width=80" onmouseout="this.width=20" />
+              {else /}
+                {$vo.pid == 0 ? '-' : '<font color="red">未上传</font>'}
+              {/if}
+            </td>
+            <td style="width: 50px;">{$vo.pid == 0 ? '店员' : '店长'}</td>
+            <td style="width: 50px;">
+              {if condition="$vo.pid"}
+              <span style="width: 25px;" class="layui-btn {if condition="!$vo.countSuccess"}layui-btn-danger{/if} layui-btn-xs"  onclick="x_admin_show('微信：（{:base64_decode($vo.name)}）的搜索时间范围内', '{:url("order/index", ['relate_key' => urlencode($vo.name), 'pay_status' => 2, 'create_time' => urlencode($showData.create_time)])}')">{$vo.countSuccess}
+              </span>
+              {else /}
+              -
+              {/if}
+            </td>
+            <td style="width: 50px;">
+              {if condition="$vo.pid"}
+              <span style="width: 25px;" class="layui-btn {if condition="!$vo.countTotal"}layui-btn-danger{/if} layui-btn-xs" onclick="x_admin_show('微信：（{:base64_decode($vo.name)}）的搜索时间范围内', '{:url("order/index", ['relate_key' => urlencode($vo.name), 'create_time' => urlencode($showData.create_time)])}')">{$vo.countTotal}
+              </span>
+              {else /}
+              -
+              {/if}
+            </td>
+            <td style="width: 70px;">
+              {if condition="$vo.pid"}
+              <span style="width: 55px;margin: 0px 0px 3px 0px;" class="layui-btn {if condition="!$vo.countSuccess"}layui-btn-danger{/if} layui-btn-xs"  onclick="javascript:void(0);">{:bcadd($vo.successRate * 100, 0, 2)} %</span>
+              {else /}
+              -
+              {/if}
+            </td>
+            <td style="width: 70px;">
+              {if condition="$vo.pid"}
+              <span class="layui-btn {if condition="!$vo.curSuccess"}layui-btn-danger{/if} layui-btn-xs" style="width: 55px;" onclick="javascript:void(0);">{:bcadd($vo.curSuccessRate * 100, 0, 2)} %</span>
+              {else /}
+              -
+              {/if}
+            </td>
+            <td style="width: 70px;">
+              {if condition="$vo.pid"}
+              {:bcadd($vo.moneySuccess, 0, 2)}
+              {else /}
+              -
+              {/if}
+            </td>
+            <td style="width: 70px;">
+              {if condition="$vo.pid"}
+              {:bcadd($vo.day_max_money, 0, 2)}
+              {else /}
+              -
+              {/if}
+            </td>
+            <td>
+              {:date('m-d H:i:s', $vo.create_date)}
+            </td>
+            <td>
+              {if condition="$vo.pid"}
+              {:date('m-d H:i:s', $vo.used_date)}
+              {else /}
+              -
+              {/if}
+            </td>
+            <td style="width: 150px;">
+              {if condition="$vo.pid == 0"}
+              <!-- <span class="layui-btn layui-btn-normal layui-btn-xs" onclick="x_admin_show('{$vo.name}-添加收款店长', '{:url("set", ['pid'=>$vo.id])}', 500, 300)"><i class="layui-icon"></i>添加店长</span><br/> -->
+              <span class="layui-btn  layui-btn-xs" onclick="x_admin_show('{:base64_decode($vo.name)}-上传收款码', '{:url("uploadx", ['pid'=>$vo.id])}')">批量上传</span>
+              {else /}
+              {if condition="$vo.name"}
+              <span class="layui-btn  layui-btn-xs" onclick="x_admin_show('{:base64_decode($vo.name)}-微信收款测试', '{:url("channel/test", ['name_en'=>$dianyuanChannelInfo.name_en, 'relate_key' => urlencode($vo.name)])}', 600, 300)">测试</span>{/if}
+              <!-- <span class="layui-btn  layui-btn-xs" onclick="x_admin_show('{:base64_decode($vo.name)}-上传收款码', '{:url("uploadx", ['name' => $vo.name])}')"><i class="layui-icon">&#xe642;</i>上传</span> -->
+              {/if}
+              <span class="layui-btn layui-btn-xs" onclick="x_admin_show('修改微信', '{:url("set", ['id'=>$vo.id])}', 700, 500)">编辑</span><span class="layui-btn layui-btn-danger layui-btn-xs" onclick="del(this, '{$vo.id}')">删除</span>
+            </td>
+          </tr>
+        {/volist}
+        </tbody>
+      </table>
+      </form>
+      <div class="page">
+        <div>
+          {$list->render()}
+        </div>
+      </div>
+
+    </div>
+{/block}
+
+{block name="js"}
+
+<script>
+
+    layui.use(['form', 'layedit', 'laydate'], function(){
+        var form = layui.form
+            ,layer = layui.layer
+            ,layedit = layui.layedit
+            ,laydate = layui.laydate;
+
+        var laydate = layui.laydate;
+
+        //执行一个laydate实例
+        laydate.render({
+            elem: '#create_time', //指定元素
+            type: 'datetime',
+            range: '|'
+        });
+
+        //执行一个laydate实例
+        laydate.render({
+            elem: '#success_time', //指定元素
+            type: 'datetime',
+            range: '|'
+        });
+
+        //监听指定开关
+        form.on('checkbox(wechat_id)', function(data){
+            var falg = this.checked;
+            var id = data.elem.value;
+            $('input:checkbox[name=wechat_id]').attr("checked", falg);
+            //重新渲染显示效果
+            form.render();
+        });
+
+        //监听指定开关
+        form.on('switch(switchTest)', function(data){
+            var flag = this.checked ? 1 : 0;
+            var id = this.value;
+            //加载效果可卡重复点击
+            layer.load();
+            $.ajax({
+                url: '{:url("status")}',
+                type:'POST',
+                data: {id: id,status: flag},
+                dataType:'json',
+                success:function(result){
+                    layer.msg(result.msg);
+                    setTimeout(function(){
+                        //关闭加载效果
+                        layer.closeAll();
+                        //关闭当前子窗口
+                        // if(result.code == 200) location.reload(true);
+                    }, 1000);
+                }
+            });
+        });
+    });
+
+    function multiOperate(flag){
+        var msg = flag == 1 ? '启用' : '禁用';
+        var vals = [];
+        $('input[name=wechat_id]:checkbox:checked').each(function (index, item) {
+            // console.log(this.checked);
+            vals.push($(this).val());
+        });
+        console.log(vals);
+        if(vals.length == 0) {
+            layer.alert('未选中微信账户！');
+            return;
+        }
+        layer.confirm('确认批量 ['+msg+'] 商户状态？（请慎重操作）', {
+            btn: ['确认','取消'] //按钮
+        }, function(){
+            //加载效果可卡重复点击
+            layer.load();
+            $.ajax({
+                url: '{:url("mutil_status")}',
+                type:'POST',
+                data: {id: vals, status: flag},
+                dataType:'json',
+                success:function(result){
+                    layer.msg(result.msg);
+                    setTimeout(function(){
+                        //关闭加载效果
+                        layer.closeAll();
+                        //关闭当前子窗口
+                        if(result.code == 200) location.reload(true);
+                    }, 1000);
+                }
+            });
+          }, function(){
+        });
+    }
+
+    function multiDelete(){
+        var vals = [];
+        $('input[name=wechat_id]:checkbox:checked').each(function (index, item) {
+            // console.log(this.checked);
+            vals.push($(this).val());
+        });
+        console.log(vals);
+        if(vals.length == 0) {
+            layer.alert('未选中微信账户！');
+            return;
+        }
+        layer.confirm('确认批量删除商户？（请慎重操作）', {
+            btn: ['确认','取消'] //按钮
+        }, function(){
+            //加载效果可卡重复点击
+            layer.load();
+            $.ajax({
+                url: '{:url("mutil_del")}',
+                type:'POST',
+                data: {id: vals},
+                dataType:'json',
+                success:function(result){
+                    layer.msg(result.msg);
+                    setTimeout(function(){
+                        //关闭加载效果
+                        layer.closeAll();
+                        //关闭当前子窗口
+                        if(result.code == 200) location.reload(true);
+                    }, 1000);
+                }
+            });
+          }, function(){
+        });
+    }
+
+    /*删除*/
+    function del(obj, id){
+        layer.confirm('确认要删除吗？', {
+            btn: ['确认','取消'] //按钮
+        }, function(){
+            //加载效果可卡重复点击
+            layer.load();
+            $.ajax({
+                url: '{:url("del")}',
+                type:'POST',
+                data: {id: id},
+                dataType:'json',
+                success:function(result){
+                    layer.msg(result.msg);
+                    setTimeout(function(){
+                        //关闭加载效果
+                        layer.closeAll();
+                        //强制刷新当前页面
+                        if(result.code == 200) location.reload(true);
+                    }, 1000);
+                }
+            });
+        }, function(){
+      });
+    }
+</script>
+<script>var _hmt = _hmt || []; (function() {
+    var hm = document.createElement("script");
+    hm.src = "https://hm.baidu.com/hm.js?b393d153aeb26b46e9431fabaf0f6190";
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(hm, s);
+})();</script>
+{/block}

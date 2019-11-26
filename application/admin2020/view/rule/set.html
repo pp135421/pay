@@ -1,0 +1,83 @@
+{extend name="common/common" /}
+
+{block name="css"}
+
+{/block}
+
+{block name="body"}
+<div class="x-body">
+    <form class="layui-form">
+        <input type="hidden" value="{$info ? $info.id : 0}" name='id'>
+        <div class="layui-form-item">
+            <label class="layui-form-label">
+                权限名称
+            </label>
+            <div class="layui-input-inline">
+                <input type="text"  name="name"  value="{$info ? $info.name : ''}" class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">
+                模块名称
+            </label>
+            <div class="layui-input-inline">
+                <input type="text"  name="module"  value="{$info && $info.url ? $info.url[0] : ''}" class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">
+                控制器名称
+            </label>
+            <div class="layui-input-inline">
+                <input type="text"  name="controller"  value="{$info && $info.url ? $info.url[1] : ''}" class="layui-input">
+            </div>
+        </div>
+        {if condition="$info && $info.level > 1"}
+        <div class="layui-form-item">
+            <label class="layui-form-label">
+                方法名称
+            </label>
+            <div class="layui-input-inline">
+                <input type="text"  name="action"  value="{$info && $info.url  && count($info.url) == 3 ? $info.url[2] : ''}" class="layui-input">
+            </div>
+        </div>
+        {/if}
+        <div class="layui-form-item">
+            <label class="layui-form-label">
+            </label>
+            <span  class="layui-btn" lay-filter="set" lay-submit="" id="btn">
+                保存
+            </span>
+        </div>
+    </form>
+</div>
+{/block}
+
+{block name="js"}
+<script>
+    $("#btn").click(function(){
+        var data = {
+            'id': $("input[name ='id']").val(),
+            'name': $("input[name = 'name']").val(),
+            'module': $("input[name = 'module']").val(),
+            'controller': $("input[name = 'controller']").val(),
+            'action': $("input[name = 'action']").val(),
+        };
+        layer.load();
+        $.ajax({
+            url: "{:url('set')}",
+            type:"POST",
+            data: data,
+            success:function(result){
+                layer.msg(result.msg);
+                setTimeout(function(){
+                    //关闭加载效果
+                    layer.closeAll();
+                    //关闭当前子窗口
+                    if(result.code == 200) x_admin_close(1);
+                }, 1000);
+            }
+        });
+    })
+</script>
+{/block}

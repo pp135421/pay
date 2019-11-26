@@ -1,0 +1,73 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta http-equiv="Content-Language" content="zh-cn">
+<meta name="apple-mobile-web-app-capable" content="no"/>
+<meta name="apple-touch-fullscreen" content="yes"/>
+<meta name="format-detection" content="telephone=no,email=no"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="white">
+<meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+<meta http-equiv="Expires" content="0">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Cache-control" content="no-cache">
+<meta http-equiv="Cache" content="no-cache">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+<title>支付宝支付</title>
+<link rel="icon" type="image/png" href="/pay/new/z1.png">
+<link rel="stylesheet" href="/static/dingding/payNew.css" media="screen and (min-width : 560px)"></link>
+<link rel="stylesheet" href="/static/dingding/payNewMobile.css" media="screen and (max-width : 560px)"></link>
+<script src="/static/dingding/jquery.min.js"></script>
+<style type="text/css">
+    #qrcode {
+        width: 250px !important;
+        height: 250px !important;
+        text-align: center;
+        margin: 0 auto;
+    }
+</style>
+</head>
+<body>
+<div class="container">
+    <div class="pay alipay">
+        <div class="wrap">
+            <div id="price" style="text-align: center;">
+                <span style="color: red; font-size: 30px;">
+                ￥ {:sprintf('%.2f', $info.actual_amount)}
+                </span>
+                <span style="text-decoration: line-through; font-size: 16px;">￥ {:sprintf('%.2f', $info.amount)}</span>
+            </div>
+            <div>
+                <p style="text-align: center; font-size: 13px; color: red;" >
+                    <span>碰到（谨防欺诈）属支付宝风控，点我已核实</span>
+                </p>
+                {if condition="$info.user_agent == 'PC'"}
+                <div style="text-align: center;">
+                    <p class="mobile_wrap" style="text-align: center; font-size: 16px; color: red;" >
+                        <span>相同订单勿重复充值</span>
+                    </p>
+                    <img id="qrcode" src="{$info.img_url}">
+                </div>
+                {/if}
+                <br/>
+            </button>
+                <div class="mobile_wrap">
+                    <div class="payweixinbtn" style="padding-top:10px;display:block;">
+                        <form id="form" action="{$info.special_str}" method="get">
+                            <?php foreach($info['query'] as $k => $v): ?>
+                            <input type="hidden"  name="<?php echo $v[0];?>" value="<?php echo $v[1];?>"  />
+                            <?php endforeach; ?>
+                            <button id="paybtn2" class="paybtn2" style="width: 300px; background-color: red;">启用支付宝进行支付</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+
+</html>

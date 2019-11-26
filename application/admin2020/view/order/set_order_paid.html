@@ -1,0 +1,99 @@
+{extend name="common/common" /}
+
+{block name="css"}
+
+{/block}
+
+{block name="body"}
+<div class="x-body">
+        <div class="layui-form-item">
+            <label class="layui-form-label">
+                订单价格
+            </label>
+            <div class="layui-input-inline">
+                <input type="text" name="amount" class="layui-input" disabled="disabled" value="{$info ? bcadd($info.amount, 0, 2) : ''}">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">
+                平台订单号
+            </label>
+            <div class="layui-input-inline">
+                <input type="text" name="platform_order_id" class="layui-input" disabled="disabled" value="{$info ? $info.platform_order_id : ''}">
+            </div>
+        </div>
+        <div class="layui-form-item" {if condition="!$Think.config.PhoneNumbers || !$info.show_sms"}style="display: none;"{/if}>
+            <label class="layui-form-label">
+                短信验证码
+            </label>
+            <div class="layui-input-inline">
+                <input type="text" name="code" class="layui-input"  value="">
+            </div>
+            <div class="layui-form-mid layui-word-aux">
+                <!-- <a href="{:url('send_sms')}"></a> -->
+               <button class="layui-btn layui-btn-danger layui-btn-xs" onclick="send_sms()">点击发送短信</button>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">
+            </label>
+            <button  class="layui-btn" lay-filter="set" lay-submit="" id="btn">
+               确定补单
+            </button>
+        </div>
+</div>
+{/block}
+
+{block name="js"}
+<script type="text/javascript">
+    $("#btn").click(function(){
+        var data = {
+            platform_order_id: $('input[name=platform_order_id]').val(),
+            code: $('input[name=code]').val(),
+        };
+       //加载效果可卡重复点击
+       layer.load();
+        $.ajax({
+            url: "{:url('set_order_paid')}",
+            type: "POST",
+            data: data,
+            success:function(result){
+                layer.msg(result.msg);
+                setTimeout(function(){
+                    //关闭加载效果
+                    layer.closeAll();
+                    //关闭当前子窗口
+                    if(result.code == 200) x_admin_close(1);
+                }, 1000);
+            }
+        });
+   });
+
+    function send_sms()
+    {
+        layer.confirm('确定发送短信？', {
+            btn: ['确认','取消'] //按钮
+        }, function(){
+            //加载效果可卡重复点击
+            layer.load();
+            $.ajax({
+                url: '{:url("send_sms")}',
+                type:'post',
+                data: {},
+                dataType:'json',
+                success:function(result){
+                    layer.msg(result.msg);
+                    setTimeout(function(){
+                        //关闭加载效果
+                        layer.closeAll();
+                        //强制刷新当前页面
+                        if(result.code == 200) location.reload(true);
+                    }, 1000);
+                }
+            });
+        }, function(){
+        });
+    }
+
+</script>
+{/block}

@@ -1,0 +1,165 @@
+{extend name="common/common" /}
+
+{block name="css"}
+
+{/block}
+
+{block name="body"}
+<div class="container">
+    <div class="logo"><a href="javascript:;">{$Think.config.platform_name_cn}-商户后台</a></div>
+    <div class="left_open">
+        <i title="展开左侧栏" class="iconfont">&#xe699;</i>
+    </div>
+    <ul class="layui-nav right" lay-filter="">
+        <li class="layui-nav-item">
+            <a href="javascript:;">{$Think.session._member.username}（{if condition="$Think.const.AGENT==2"}代理商户{else /}普通商户{/if}）</a>
+            <dl class="layui-nav-child">
+                <dd><a onclick="x_admin_show('修改登录密码','{:url("member/pwd")}', 500, 400)">修改登录密码</a></dd>
+                <dd><a onclick="x_admin_show('修改支付密码','{:url("member/paypwd")}', 500, 400)">修改支付密码</a></dd>
+                <dd><a href="{:url('login/logout')}">退出</a></dd>
+            </dl>
+        </li>
+        <!-- <li class="layui-nav-item to-index">
+            <dd>
+                <a onclick="x_admin_show('修改密码', '{:url("member/pwd")}', 500, 400)">修改密码</a>
+            </dd>
+        </li> -->
+    </ul>
+</div>
+<div class="left-nav">
+    <div id="side-nav">
+        <ul id="nav">
+            <li>
+                <a href="javascript:;">
+                    <i class="iconfont">&#xe6b8;</i>
+                    <cite>账户管理</cite>
+                    <i class="iconfont nav_right">&#xe697;</i>
+                </a>
+                <ul class="sub-menu">
+                    <li>
+                        <a _href="{:url('member/bank')}">
+                            <i class="iconfont">&#xe6a7;</i>
+                            <cite>银行卡管理</cite>
+
+                        </a>
+                    </li>
+                    <li>
+                        <a _href="{:url('member/log_login')}">
+                            <i class="iconfont">&#xe6a7;</i>
+                            <cite>登录记录</cite>
+                        </a>
+                    </li>
+                </ul>
+            </li>
+            <li>
+                <a href="javascript:;">
+                    <i class="iconfont">&#xe723;</i>
+                    <cite>订单管理</cite>
+                    <i class="iconfont nav_right">&#xe697;</i>
+                </a>
+                <ul class="sub-menu">
+                    <li>
+                        <a _href="{:url('Order/index')}">
+                            <i class="iconfont">&#xe6a7;</i>
+                            <cite>订单列表</cite>
+                        </a>
+                    </li >
+                </ul>
+            </li>
+            <li>
+                <a href="javascript:;">
+                    <i class="iconfont">&#xe70c;</i>
+                    <cite>财务管理</cite>
+                    <i class="iconfont nav_right">&#xe697;</i>
+                </a>
+                <ul class="sub-menu">
+                    <li>
+                        <a _href="{:url('Finance/index')}">
+                            <i class="iconfont">&#xe6a7;</i>
+                            <cite>资金记录</cite>
+                        </a>
+                    </li >
+                </ul>
+            </li>
+            <li>
+                <a href="javascript:;">
+                    <i class="iconfont">&#xe82a;</i>
+                    <cite>结算管理</cite>
+                    <i class="iconfont nav_right">&#xe697;</i>
+                </a>
+                <ul class="sub-menu">
+                    <li>
+                        <a _href="{:url('deposit/index')}">
+                            <i class="iconfont">&#xe6a7;</i>
+                            <cite>结算记录</cite>
+                        </a>
+                    </li >
+                    <li>
+                        <a _href="{:url('deposit/deposit')}">
+                            <i class="iconfont">&#xe6a7;</i>
+                            <cite>结算申请</cite>
+                        </a>
+                    </li >
+                </ul>
+            </li>
+            {if condition="AGENT == 2"}
+            <li>
+                <a href="javascript:;">
+                    <i class="iconfont">&#xe82a;</i>
+                    <cite>代理管理</cite>
+                    <i class="iconfont nav_right">&#xe697;</i>
+                </a>
+                <ul class="sub-menu">
+                    <li>
+                        <a _href="{:url('member/agent')}">
+                            <i class="iconfont">&#xe6a7;</i>
+                            <cite>下级代理列表</cite>
+                        </a>
+                    </li >
+                </ul>
+            </li>
+            {/if}
+            <li>
+                <a href="javascript:;">
+                    <i class="iconfont">&#xe6a4;</i>
+                    <cite>API管理</cite>
+                    <i class="iconfont nav_right">&#xe697;</i>
+                </a>
+                <ul class="sub-menu">
+                    <li>
+                        <a _href="{:url('Api/rate')}">
+                            <i class="iconfont">&#xe6a7;</i>
+                            <cite>通道费率</cite>
+                        </a>
+                    </li >
+                    <li>
+                        <a _href="{:url('Api/member')}">
+                            <i class="iconfont">&#xe6a7;</i>
+                            <cite>API开发</cite>
+                        </a>
+                    </li >
+                </ul>
+            </li>
+        </ul>
+    </div>
+</div>
+<div class="page-content">
+    <div class="layui-tab tab" lay-filter="xbs_tab" lay-allowclose="false">
+        <ul class="layui-tab-title">
+            <li class="home"><i class="layui-icon">&#xe68e;</i>我的桌面</li>
+        </ul>
+        <div class="layui-tab-content">
+            <div class="layui-tab-item layui-show">
+                <iframe src='{:url('welcome')}' frameborder="0" scrolling="yes" class="x-iframe"></iframe>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="page-content-bg"></div>
+<div class="footer">
+    <div class="copyright"></div>
+</div>
+{/block}
+{block name="js"}
+
+{/block}

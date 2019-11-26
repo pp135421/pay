@@ -1,0 +1,125 @@
+{extend name="common/common" /}
+{block name="css"}
+<style>
+  table tr td {
+    text-align: left!important;
+  }
+  table tr th {
+    text-align: left!important;
+  }
+</style>
+{/block}
+{block name="body"}
+    <div class="x-body">
+        <form action="" method="post" class="layui-form layui-form-pane">
+            <input type="hidden" name="id" value="{$info.id}">
+                <div class="layui-form-item">
+                    <label class="layui-form-label">
+                        角色名
+                    </label>
+                    <div class="layui-input-inline">
+                        <input type="text" id="rolename" name="rolename" required="" lay-verify="required"
+                        autocomplete="off" disabled class="layui-input" value="{$info.rolename}">
+                    </div>
+                </div>
+                <div class="layui-form-item layui-form-text">
+                    <table  class="layui-table layui-input-block">
+                        <tbody>
+                            {volist name="listTree" id="vo"}
+                            <tr>
+                                {if condition="$vo.pid == 0"}
+                                    <td>
+                                        <input type="checkbox" {if condition="in_array($vo.id, $ruleData)"}checked{/if}  name="rule_id" lev="1" lay-skin="primary" title="{$vo.name}" value="{$vo.id}">
+                                    </td>
+                                    <td>
+                                        <div class="layui-input-block">
+                                            {volist name="listTree" id="vo2"}
+                                                {if condition="$vo2.pid == $vo.id"}
+                                                <input type="checkbox" {if condition="in_array($vo2.id, $ruleData)"}checked{/if}  name="rule_id" lev="2" class="checkboxRole"  lay-skin="primary" title="{$vo2.name}" value="{$vo2.id}">
+                                            &ensp;&ensp;&ensp; | &ensp;&ensp;&ensp;
+                                                {volist name="listTree" id="vo3"}
+                                                {if condition="$vo3.pid == $vo2.id"}
+                                                <input type="checkbox" {if condition="in_array($vo3.id, $ruleData)"}checked{/if}  name="rule_id" lev="3" class="checkboxRole"  lay-skin="primary" title="{$vo3.name}" value="{$vo3.id}">
+                                                {/if}
+                                                {/volist}
+                                            <br/>
+                                                {/if}
+                                            {/volist}
+                                        </div>
+                                    </td>
+                                {/if}
+                            </tr>
+                            {/volist}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="layui-form-item">
+                <button class="layui-btn " lay-submit="" lay-filter="set">保存</button>
+              </div>
+            </form>
+    </div>
+{/block}
+{block name="js"}
+<script>
+    //layui 复选框自动选择处理
+        $(document).on("click", "div.layui-form-checkbox", function () {
+            var parent = $(this).parent().parent();
+            if($(this).prev('input').attr('lev') == 1){
+                if(($(this).hasClass("layui-form-checked"))){
+                    parent.find('div.layui-form-checkbox').addClass('layui-form-checked');
+                }else{
+                    parent.find('div.layui-form-checkbox').removeClass('layui-form-checked');
+                }
+            }else{
+                if(($(this).hasClass("layui-form-checked"))){
+                    parent.parent().find('div.layui-form-checkbox:eq(0)').addClass('layui-form-checked');
+                }else{
+                    var count = 0;
+                    parent.parent().find('div.layui-form-checkbox:gt(0)').each(function(index, obj){
+                        if(($(obj).hasClass("layui-form-checked"))){
+                            count++;
+                        }
+                    });
+                    if(count == 0){
+                        parent.parent().find('div.layui-form-checkbox:eq(0)').removeClass('layui-form-checked');
+                    }
+                }
+            }
+
+        });
+
+        $('.layui-form').submit(function(){
+            var rule_id = [];
+            $('tr div.layui-form-checked').prev('input').each(function(index, obj){
+                rule_id.push($(obj).val());
+            });
+            if(rule_id.length == 0) {
+                layer.alert('必须设置权限！');
+                return false;
+            }
+            var data = {
+                'id': $('input[name=id]').val(),
+                'rule_id': rule_id,
+            };
+            //加载效果可卡重复点击
+            layer.load();
+            $.ajax({
+                url: '{:url("set_rule")}',
+                type:'post',
+                data: data,
+                dataType:'json',
+                success:function(result){
+                    layer.msg(result.msg);
+                    setTimeout(function(){
+                        //关闭加载效果
+                        layer.closeAll();
+                        //关闭当前子窗口
+                        if(result.code == 200) x_admin_close(1);
+                    }, 1000);
+                }
+            });
+            return false;
+        });
+</script>
+{/block}
+

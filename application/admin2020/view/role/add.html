@@ -1,0 +1,54 @@
+{extend name="common/common" /}
+
+{block name="css"}
+
+{/block}
+
+{block name="body"}
+<div class="x-body">
+    <form class="layui-form">
+        <input type="hidden" value="{$info ? $info.id : 0}" name='id'>
+        <div class="layui-form-item">
+            <label class="layui-form-label">
+                角色名称
+            </label>
+            <div class="layui-input-inline">
+                <input type="text"  name="rolename"  value="{$info ? $info.rolename : ''}" class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">
+            </label>
+            <span  class="layui-btn" lay-filter="set" lay-submit="" id="btn">
+                保存
+            </span>
+        </div>
+    </form>
+</div>
+{/block}
+
+{block name="js"}
+<script>
+    $("#btn").click(function(){
+        //加载效果可卡重复点击
+        layer.load();
+        $.ajax({
+            url: "{:url('add_role')}",
+            type: "POST",
+            data: {
+                'id': $("input[name ='id']").val(),
+                'rolename': $("input[name = 'rolename']").val(),
+            },
+            success:function(result){
+                layer.msg(result.msg);
+                setTimeout(function(){
+                    //关闭加载效果
+                    layer.closeAll();
+                    //关闭当前子窗口
+                    if(result.code == 200) x_admin_close(1);
+                }, 1000);
+            }
+        });
+    })
+</script>
+{/block}

@@ -1,0 +1,50 @@
+{extend name="common/common" /}
+
+{block name="css"}
+
+{/block}
+
+{block name="body"}
+      <table class="layui-table">
+        <thead>
+          <tr>
+            <th style="text-align: center;">登录账户</th>
+            <th style="text-align: center;">登录IP</th>
+            <th style="text-align: center;">登录次数</th>
+            <th style="text-align: center;">登录结果</th>
+            <th style="text-align: center;">登录时间</th>
+          </tr>
+        </thead>
+        <tbody>
+          {volist name='list' id='vo'}
+          <tr>
+            <td style="text-align: center;">{$vo.username}</td>
+            <td style="text-align: center;">{$vo.ip}</td>
+            <td style="text-align: center;">{$vo.login_count}</td>
+            <th style="text-align: center;">{if condition="$vo.result == 1"}<font color="green">成功</font>{else /}<font color="red">失败</font>{/if}</th>
+            <td style="text-align: center;">{:date('Y-m-d H:i:s',$vo.login_time)}</td>
+          </tr>
+          {/volist}
+        </tbody>
+      </table>
+      <div class="page">
+        <div>
+          {$list->render()}
+        </div>
+      </div>
+    </div>
+{/block}
+{block name="js"}
+<script>
+  layui.use('laydate', function(){
+    var laydate = layui.laydate;
+
+    //执行一个laydate实例
+    laydate.render({
+        elem: '#login_time', //指定元素
+        type: 'datetime',
+        range: '|'
+    });
+  });
+</script>
+{/block}

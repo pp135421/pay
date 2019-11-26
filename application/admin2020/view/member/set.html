@@ -1,0 +1,156 @@
+{extend name="common/common" /}
+
+{block name="css"}
+
+{/block}
+
+{block name="body"}
+<div class="x-body">
+        <input type="hidden"  name="id"  value="{$info.id}">
+        <div class="layui-form-item">
+            <label class="layui-form-label">
+                商户账户
+            </label>
+            <div class="layui-input-inline">
+                <input type="text" name="username" class="layui-input"  {if condition="$info && $info.id"}disabled="disabled"{/if} value="{$info ? $info.username : ''}">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">
+                商户昵称
+            </label>
+            <div class="layui-input-inline">
+                <input type="text" name="nickname" class="layui-input" value="{$info ? $info.nickname : ''}">
+            </div>
+        </div>
+        {if condition="$info && $info.id"}
+        <div class="layui-form-item">
+            <label class="layui-form-label">
+                登录密码
+            </label>
+            <div class="layui-input-inline">
+                <input type="text" name="password"
+                       class="layui-input" value="">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">
+                支付密码
+            </label>
+            <div class="layui-input-inline">
+                <input type="text" name="paypwd"
+                        class="layui-input" value="">
+            </div>
+        </div>
+        {/if}
+        <div class="layui-form-item">
+            <label class="layui-form-label">
+                提现手续费
+            </label>
+            <div class="layui-input-inline">
+                <input type="text" name="deposit_amount"
+                        class="layui-input" value="{$info ? $info.deposit_amount : ''}">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">
+                扣除方式
+            </label>
+            <div class="layui-input-inline">
+                <select name="deposit_type">
+                    <option value="2" {if condition="$info && $info.deposit_type == 2"}selected="selected"{/if}>从商户余额扣除</option>
+                    <option value="1" {if condition="$info && $info.deposit_type == 1"}selected="selected"{/if}>从到账余额扣除</option>
+                </select>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">
+                安全IP
+            </label>
+            <div class="layui-input-inline">
+                <input type="text" name="safe_ip"
+                        class="layui-input" value="{$info ? $info.safe_ip : ''}">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label for="L_email" class="layui-form-label">
+                错误次数
+            </label>
+            <div class="layui-input-inline">
+                <input type="text" id="L_nickname" name="login_error_count" autocomplete="off" class="layui-input" value="{$info ? $info.login_error_count : ''}">
+            </div>
+            <div class="layui-form-mid layui-word-aux">
+
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">
+                是否代理
+            </label>
+            <div class="layui-input-inline">
+                <select name="agent">
+                    <option value="1" {if condition="$info && $info.agent == 1"}selected="selected"{/if}>普通商户</option>
+                    <option value="2" {if condition="$info && $info.agent == 2"}selected="selected"{/if}>代理商户</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">
+                上级代理
+            </label>
+            <div class="layui-input-inline">
+                <select name="pid">
+                    <option value="0">请选择上级代理</option>
+                    {volist name="memberAgentData" id="vo"}
+                    <option value="{$vo.id}" {if condition="$info && $info.pid == $vo.id"}selected="selected"{/if}>{$vo.username}（{$vo.nickname}）</option>
+                    {/volist}
+                </select>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">
+            </label>
+            <button  class="layui-btn" lay-filter="set" lay-submit="" id="btn">
+               保存
+            </button>
+        </div>
+</div>
+{/block}
+
+{block name="js"}
+<script type="text/javascript">
+    $("#btn").click(function(){
+        var data = {
+            id: $('input[name=id]').val(),
+            username: $('input[name=username]').val(),
+            nickname: $('input[name=nickname]').val(),
+            safe_ip: $('input[name=safe_ip]').val(),
+            login_error_count: $('input[name=login_error_count]').val(),
+            password: $('input[name=password]').val(),
+            paypwd: $('input[name=paypwd]').val(),
+            deposit_amount: $('input[name=deposit_amount]').val(),
+            agent: $('select[name=agent]').val(),
+            deposit_type: $('select[name=deposit_type]').val(),
+            pid: $('select[name=pid]').val(),
+        };
+       //加载效果可卡重复点击
+       layer.load();
+        $.ajax({
+            url: "{:url('set')}",
+            type: "POST",
+            data: data,
+            success:function(result){
+                layer.msg(result.msg);
+                setTimeout(function(){
+                    //关闭加载效果
+                    layer.closeAll();
+                    //关闭当前子窗口
+                    if(result.code == 200) x_admin_close(1);
+                }, 1000);
+            }
+        });
+   });
+</script>
+{/block}

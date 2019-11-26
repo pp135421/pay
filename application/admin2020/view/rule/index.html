@@ -1,0 +1,74 @@
+{extend name="common/common" /}
+
+{block name="css"}
+
+{/block}
+
+{block name="body"}
+<div class="x-body">
+    <button class="layui-btn layui-btn"  onclick="x_admin_show('添加一级菜单', '{:url("add_rule")}', 500, 500)"><i class="layui-icon"></i>一级菜单</button>
+    <a class="layui-btn layui-btn-small" style="line-height:1.6em;" href="javascript:location.replace(location.href);" title="刷新">
+        <i class="layui-icon" style="line-height:30px">ဂ</i></a>
+    <table class="layui-table">
+        <thead>
+        <tr>
+            <th>#</th>
+            <th>权限名称</th>
+            <th>权限规则</th>
+            <th>权限等级</th>
+            <th>操作</th>
+        </thead>
+        <tbody>
+        {volist name="listTree" id="vo"}
+        <tr>
+            <td>{$vo.id}</td>
+            <td style="text-align: left!important;">{:str_repeat('-', ($vo.level - 1) * 4)}{$vo.name}</td>
+            <td>{$vo.url}</td>
+            <td>{$vo.level}级菜单</td>
+            <td class="td-manage">
+                <button class="layui-btn  layui-btn-sm"  onclick="x_admin_show('添加子菜单', '{:url("add_rule", ["id" => $vo.id])}', 500, 500)"><i class="layui-icon"></i>子菜单</button>
+
+                <button class="layui-btn  layui-btn-sm"  onclick="x_admin_show('编辑权限', '{:url("set", ["id" => $vo.id])}', 500, 500)"><i class="layui-icon">&#xe642;</i>编辑</button>
+                <span class="layui-btn layui-btn-danger layui-btn-sm" onclick="del(this, '{$vo.id}')"><i class="layui-icon">&#xe640;</i>删除</span>
+            </td>
+        </tr>
+        {/volist}
+        </tbody>
+    </table>
+    <div class="page">
+        <div>
+            {$list->render()}
+        </div>
+    </div>
+</div>
+{/block}
+
+{block name="js"}
+<script>
+    /*删除*/
+    function del(obj, id){
+        layer.confirm('确认要删除吗？', {
+            btn: ['确认','取消'] //按钮
+        }, function(){
+            //加载效果可卡重复点击
+            layer.load();
+            $.ajax({
+                url: '{:url("del")}',
+                type:'POST',
+                data: {id: id},
+                dataType:'json',
+                success:function(result){
+                    layer.msg(result.msg);
+                    setTimeout(function(){
+                        //关闭加载效果
+                        layer.closeAll();
+                        //强制刷新当前页面
+                        if(result.code == 200) location.reload(true);
+                    }, 1000);
+                }
+            });
+        }, function(){
+        });
+    }
+</script>
+{/block}

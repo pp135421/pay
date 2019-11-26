@@ -1,0 +1,129 @@
+{extend name="common/common" /}
+
+{block name="css"}
+
+{/block}
+
+{block name="body"}
+<div class="x-body">
+<form class="layui-form" action="">
+    <input type="hidden"  name="id"  placeholder="" value="{if condition='$info'}{$info.id}{else /}0{/if}">
+    <input type="hidden"  name="pid"  placeholder="" value="{$pid}">
+    <div class="layui-form-item">
+        <label class="layui-form-label">
+            微信账户
+        </label>
+        <div class="layui-input-inline">
+            <input type="text" name="account"
+                   class="layui-input" value="{if condition='$info'}{$info.account}{/if}" placeholder="建议填写微信号！">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">
+            微信昵称
+        </label>
+        <div class="layui-input-inline">
+            <input type="text" name="name"
+                   class="layui-input" value="{if condition='$info'}{:base64_decode($info.name)}{/if}" placeholder="必须和微信号昵称一致！">
+            <select name="wechat_name" lay-filter="wechat_name">
+            <option value="">请选择匹配昵称</option>
+            {volist name="wechatNameData" id="vo"}
+            <option value="{:base64_decode($vo)}" onchange="changeWechatName()">{:base64_decode($vo)}</option>
+            {/volist}
+            </select>
+        </div>
+        <div class="layui-form-mid layui-word-aux">
+            <span class="x-red">*</span>&ensp;&ensp;扫二维码回调后才能出现，可选出特殊表情和符号的昵称，建议用在复杂或不确定的昵称上
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">
+            每日限额
+        </label>
+        <div class="layui-input-inline">
+            <input type="text" name="day_max_money"
+                   class="layui-input" value="{if condition='$info'}{:bcadd($info.day_max_money, 0, 2)}{else /}0.00{/if}">
+        </div>
+        <div class="layui-form-mid layui-word-aux">
+            <span class="x-red">*</span>&ensp;&ensp;每日限额受微信列表右上角【修改配置】里选项启用或禁用的控制
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">
+            收款提示
+        </label>
+        <div class="layui-input-inline">
+            <select name="is_unusual">
+            <option value="2" {if condition="$info.is_unusual == 2" }selected{/if}>正常</option>
+            <option value="1" {if condition="$info.is_unusual == 1" }selected{/if}>异常</option>
+            </select>
+        </div>
+        <div class="layui-form-mid layui-word-aux">
+            <span class="x-red">*</span>&ensp;&ensp;仅是文字提示，发现收款异常后可修改此标志，方便后续启用与禁用
+        </div>
+    </div>
+    <div class="layui-form-item" style="margin-top:5%;">
+        <label for="L_repass" class="layui-form-label">
+        </label>
+        <span  class="layui-btn" lay-filter="add" lay-submit="">
+            {if condition='$info'}修改{else /}添加{/if}
+        </span>
+    </div>
+</form>
+</div>
+{/block}
+
+{block name="js"}
+<script type="text/javascript">
+    layui.use(['form','layer'], function(){
+        $ = layui.jquery;
+        var form = layui.form
+            ,layer = layui.layer;
+        var form = layui.form;
+
+        //商户的支付宝单独、轮询切换
+        form.on('select(wechat_name)', function (data) {
+            var id = data.elem.value;
+            if(!id) return;
+            var name = $(data.elem).find("option:selected").text();
+            $('input[name=name]').val(name);
+        });
+
+        //监听提交
+        form.on('submit(add)', function(data){
+            var data = {
+                'id': $('input[name=id]').val(),
+                'pid': $('input[name=pid]').val(),
+                'account': $('input[name=account]').val(),
+                'name': $('input[name=name]').val(),
+                'day_max_money': $('input[name=day_max_money]').val(),
+                'is_unusual': $('select[name=is_unusual]').val(),
+            };
+            //加载效果可卡重复点击
+            layer.load();
+            $.ajax({
+                url: '{:url("set")}',
+                type:'POST',
+                data: data,
+                dataType:'json',
+                success:function(result){
+                    layer.msg(result.msg);
+                    setTimeout(function(){
+                        //关闭加载效果
+                        layer.closeAll();
+                        //关闭当前子窗口
+                        if(result.code == 200){
+                            x_admin_close(1);
+                        }
+                    }, 1000);
+                }
+            });
+        });
+
+    });
+
+
+    $("#btn").click(function(){
+    });
+</script>
+{/block}

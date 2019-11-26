@@ -1,0 +1,91 @@
+{extend name="common/common" /}
+
+{block name="css"}
+
+{/block}
+
+{block name="body"}
+<div class="x-body">
+    <div class="layui-form-item">
+        <label class="layui-form-label">
+            付款异常
+        </label>
+        <div class="layui-input-inline" style="width: 100px; height: 60px;">
+            <select name="crontab_close_wechat_account_order_fail_acount">
+              <option value="2" {if condition="$info.crontab_close_wechat_account_order_fail_acount == 2" }selected{/if}>禁用</option>
+              <option value="1" {if condition="$info.crontab_close_wechat_account_order_fail_acount == 1" }selected{/if}>启用</option>
+            </select>
+        </div>
+        <div class="layui-input-inline" style="width: 100px; height: 60px;">
+            <input type="text" name="order_fail_acount"
+                   class="layui-input" value="{if condition='$info'}{$info.order_fail_acount}{/if}">
+        </div>
+        <div class="layui-form-mid layui-word-aux">
+            <span class="x-red">*</span>&ensp;&ensp;关闭当日连续 {$info.order_fail_acount} 笔都付款失败微信账户（每分钟检测1次，以最后1笔2分钟后判断）
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">
+            每日限额
+        </label>
+        <div class="layui-input-inline" style="width: 100px; height: 60px;">
+            <select name="crontab_close_wechat_account_day_max_money">
+              <option value="2" {if condition="$info.crontab_close_wechat_account_day_max_money == 2" }selected{/if}>禁用</option>
+              <option value="1" {if condition="$info.crontab_close_wechat_account_day_max_money == 1" }selected{/if}>启用</option>
+            </select>
+        </div>
+        <div class="layui-form-mid layui-word-aux">
+            <span class="x-red">*</span>&ensp;&ensp;关闭当日收入超过每日限额的微信账户（每分钟检测1次）
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">
+            延时派单
+        </label>
+        <div class="layui-input-inline" style="width: 100px; height: 60px;">
+            <input type="text" name="delay_dispatch_second"
+                   class="layui-input" value="{if condition='$info'}{$info.delay_dispatch_second}{/if}">
+        </div>
+        <div class="layui-form-mid layui-word-aux">
+            <span class="x-red">*</span>&ensp;&ensp;同1个微信（相同金额）被分配到订单的间隔时间：{$info.delay_dispatch_second} 分钟（不建议超过5分钟）
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">
+        </label>
+        <button  class="layui-btn" id="btn" lay-filter="set" lay-submit="">
+            {if condition='$info'}修改{else /}添加{/if}
+        </button>
+    </div>
+</div>
+{/block}
+
+{block name="js"}
+<script type="text/javascript">
+    $("#btn").click(function(){
+        var data = {
+            'crontab_close_wechat_account_order_fail_acount': $('select[name=crontab_close_wechat_account_order_fail_acount]').val(),
+            'crontab_close_wechat_account_day_max_money': $('select[name=crontab_close_wechat_account_day_max_money]').val(),
+            'order_fail_acount': $('input[name=order_fail_acount]').val(),
+            'delay_dispatch_second': $('input[name=delay_dispatch_second]').val(),
+        };
+        //加载效果可卡重复点击
+        layer.load();
+        $.ajax({
+            url: '{:url("set_config")}',
+            type:'POST',
+            data: data,
+            dataType:'json',
+            success:function(result){
+                layer.msg(result.msg);
+                setTimeout(function(){
+                    //关闭加载效果
+                    layer.closeAll();
+                    //关闭当前子窗口
+                    if(result.code == 200) x_admin_close(1);
+                }, 1000);
+            }
+        });
+    });
+</script>
+{/block}

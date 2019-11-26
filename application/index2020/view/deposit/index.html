@@ -1,0 +1,184 @@
+{extend name="common/common" /}
+
+{block name="css"}
+<style>
+    a{
+        text-decoration: none;
+        /*color: #009688;*/
+    }
+    table tr td {
+        font-size: 10px!important;
+        padding: 3px!important;
+        margin: 0px!important;
+    }
+    table tr th {
+        font-size: 10px!important;
+        padding: 3px!important;
+        margin: 0px!important;
+    }
+</style>
+{/block}
+
+{block name="body"}
+<div class="x-body">
+    <div class="layui-row">
+
+        <form class="layui-form layui-col-md12 x-so" method="POST">
+            <input class="layui-input" style="width: 300px;" placeholder="申请起始时间" name="create_time" id="create_time" value="{$showData.create_time}">
+            <input class="layui-input" style="width: 200px;" placeholder="打款起始时间" name="success_time" id="success_time" value="{$showData.success_time}">
+            <div class="layui-input-inline">
+                <select name="status">
+                    <option value="">提现状态</option>
+                    <option value="1" {if $showData.status eq 1} selected {/if}>未处理</option>
+                    <option value="2" {if $showData.status eq 2} selected {/if}>处理中</option>
+                    <option value="3" {if $showData.status eq 3} selected {/if}>已打款</option>
+                    <option value="4" {if $showData.status eq 4} selected {/if}>已驳回</option>
+                </select>
+            </div>
+            <div class="layui-input-inline">
+                <select name="submit_type">
+                    <option value="">提现方式</option>
+                    <option value="1" {if $showData.submit_type eq 1} selected {/if}>手动</option>
+                    <option value="2" {if $showData.submit_type eq 2} selected {/if}>代付</option>
+                </select>
+            </div>
+            <div class="layui-input-inline">
+                <select name="deposit_type">
+                    <option value="">手续费扣除方式</option>
+                    <option value="1" {if $showData.deposit_type eq 1} selected {/if}>从到账余额扣除</option>
+                    <option value="2" {if $showData.deposit_type eq 2} selected {/if}>从商户余额扣除</option>
+                </select>
+            </div>
+            <button class="layui-btn"  lay-submit="" lay-filter="sreach"><i class="layui-icon">&#xe615;</i></button>
+        </form>
+    </div>
+    <form class="layui-form" action="">
+        <table class="layui-table">
+            <thead>
+            <tr>
+                <th>提现状态</th>
+                <th>商户号<br/>昵称</th>
+                <th>平台提现单号<br/>下游提现单号</th>
+                <th>申请时间<br/>结算时间</th>
+                <th>手续费</th>
+                <th>手续扣费方式</th>
+                <th>提现方式</th>
+                <th>下发金额</th>
+                <th>银行名称<br/>开户人</th>
+                <th>支行名称<br/>银行卡号</th>
+                <th>省份<br/>城市</th>
+            </tr>
+            </thead>
+            <tbody>
+            {volist name="list2" id="vo"}
+            <tr>
+                <td>
+                    {if $vo.status == 1}
+                    <span class="layui-btn layui-btn-danger layui-btn-xs">未处理</span>
+                    {elseif $vo.status == 2}
+                    <span class="layui-btn layui-btn-normal layui-btn-xs">处理中</span>
+                    {elseif $vo.status == 3}
+                    <span class="layui-btn layui-btn layui-btn-xs">已打款</span>
+                    {elseif $vo.status == 4}
+                    <span class="layui-btn layui-btn-warm layui-btn-xs">已驳回</span>
+                    {/if}
+                </td>
+                <td>{$vo.member_id}<br/><font color="#009688">{$vo.nickname}</font></td>
+                <td>{$vo.deposit_order_id}<br/>{$vo.submit_order_id}</td>
+                <td>{:date('Y-m-d H:i:s', $vo.create_date)}<br/>{if condition="$vo.success_date"}{:date('Y-m-d H:i:s', $vo.success_date)}{else /}-{/if}</td>
+                <td>{:bcadd($vo.deposit_amount, 0, 2)}</td>
+                <td>{$vo.deposit_type == 1 ? '<span class="layui-btn layui-btn-normal layui-btn-xs">从到账余额扣除</span>' : '<span class="layui-btn layui-btn-xs">从商户余额扣除</span>'}</td>
+                <td>{$vo.submit_type == 1 ? '<span class="layui-btn layui-btn-danger layui-btn-xs">手动</span>' : '<span class="layui-btn layui-btn-xs">代付</span>'}</td>
+                <td>{:bcadd($vo.amount, 0, 2)}</td>
+                <td>{$vo.bank_name}<br/>{$vo.bank_account}</td>
+                <td>{$vo.bank_branch_name}<br/>{$vo.bank_card_no}</td>
+                <td>{$vo.province}<br/>{$vo.city}</td>
+            </tr>
+            {/volist}
+            </tbody>
+        </table>
+    </form>
+    <div class="page">
+        <div>
+            {$list->render()}
+        </div>
+    </div>
+
+</div>
+{/block}
+
+{block name="js"}
+<script>
+    layui.use(['laydate','form'], function(){
+        var laydate = layui.laydate,
+            form = layui.form;
+
+        //执行一个laydate实例
+        laydate.render({
+            elem: '#create_time', //指定元素
+            type: 'datetime',
+            range: '|' //或 range: '~' 来自定义分割字符
+        });
+
+        //执行一个laydate实例
+        laydate.render({
+            elem: '#success_time' ,//指定元素
+            type: 'datetime',
+            range: '|' //或 range: '~' 来自定义分割字符
+        });
+
+        //监听指定开关
+        form.on('switch(switchTest)', function(data){
+            var status = this.checked?1:2;
+            var mid = data.value;
+            $.ajax({
+                url: "{:url('member_status')}",
+                type:"POST",
+                data: {
+                    'status':status,
+                    'mid':mid,
+                },
+                success:function(result){
+                    if(result.status == 1){
+                        layer.tips(result.msg, data.othis,{
+                            tips: [4, '#78BA32']
+                        });
+                    }else{
+                        layer.closeAll();
+                        layer.tips(result.msg, data.othis);
+                    }
+                }
+            });
+        });
+
+    });
+
+
+    /*用户-删除*/
+    function member_del(id){
+        layer.confirm('确认删除用户？',function(){
+            $.ajax({
+                url: "{:url('member_del')}",
+                type:"POST",
+                data: {
+                    'mid':id,
+                },
+                success:function(result){
+                    layer.close(layer.index);
+                    if(result.status == 1){
+                        swal("成功!！", result.msg,"success");
+                        setTimeout(function(){
+                            x_admin_close();
+                        },2000)
+                    }else{
+                        layer.closeAll();
+                        swal('失败', result.msg, "error");
+                    }
+                }
+            });
+        });
+
+    }
+
+</script>
+{/block}

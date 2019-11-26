@@ -1,0 +1,105 @@
+{extend name="common/common" /}
+{block name="css"}
+<style>
+    a{
+        text-decoration: none;
+        color: #009688;
+    }
+</style>
+{/block}
+{block name="body"}
+<div class="x-body">
+    <xblock>
+        <a class="layui-btn layui-btn-small" style="line-height:1.6em;" href="javascript:location.replace(location.href);" title="刷新">
+            <i class="layui-icon" style="line-height:30px">ဂ</i></a>
+    </xblock>
+    <table class="layui-table layui-form">
+        <thead>
+            <th>#</th>
+            <th>可用微信昵称</th>
+            <th>操作</th>
+        </thead>
+        <tbody>
+        {volist name="wechatNameData" id="vo"}
+        <tr>
+            <td>{$key+1}</td>
+            <td>{:base64_decode($vo)}</td>
+            <td class="td-manage">
+                <span class="layui-btn layui-btn-danger layui-btn-xs" onclick="del(this, '{:base64_decode($vo)}')"><i class="layui-icon">&#xe640;</i>删除</span>
+            </td>
+            </td>
+        </tr>
+        {/volist}
+        </tbody>
+    </table>
+</div>
+
+{/block}
+{block name="js"}
+<script>
+    layui.use(['form', 'layedit', 'laydate'], function(){
+        var form = layui.form
+            ,layer = layui.layer
+            ,layedit = layui.layedit
+            ,laydate = layui.laydate;
+
+        //日期
+        laydate.render({
+            elem: '#date'
+        });
+        laydate.render({
+            elem: '#date1'
+        });
+
+        //监听指定开关
+        form.on('switch(switchTest)', function(data){
+            var flag = this.checked ? 1 : 0;
+            var id = this.value;
+            //加载效果可卡重复点击
+            layer.load();
+            $.ajax({
+                url: '{:url("status")}',
+                type:'POST',
+                data: {id: id,status: flag},
+                dataType:'json',
+                success:function(result){
+                    layer.msg(result.msg);
+                    setTimeout(function(){
+                        //关闭加载效果
+                        layer.closeAll();
+                        //强制刷新当前页面
+                        if(result.code == 200) location.reload(true);
+                    }, 1000);
+                }
+            });
+        });
+    });
+
+
+    /*删除*/
+    function del(obj, name){
+        layer.confirm('确认要删除吗？', {
+            btn: ['确认','取消'] //按钮
+        }, function(){
+            //加载效果可卡重复点击
+            layer.load();
+            $.ajax({
+                url: '{:url("name_del")}',
+                type:'POST',
+                data: {name: name},
+                dataType:'json',
+                success:function(result){
+                    layer.msg(result.msg);
+                    setTimeout(function(){
+                        //关闭加载效果
+                        layer.closeAll();
+                        //强制刷新当前页面
+                        if(result.code == 200) location.reload(true);
+                    }, 1000);
+                }
+            });
+        }, function(){
+        });
+    }
+</script>
+{/block}

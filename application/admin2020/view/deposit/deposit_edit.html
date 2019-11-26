@@ -1,0 +1,174 @@
+{extend name="common/common" /}
+
+{block name="css"}
+
+{/block}
+
+{block name="body"}
+<div class="x-body">
+    <form class="layui-form">
+        <div class="layui-form-item">
+            <div class="layui-input-inline">
+                提现金额（￥）：<font color="red">{:bcadd($money, 0, 2)}</font>
+            </div>
+
+        </div>
+        <table class="layui-table">
+            <thead>
+            <tr>
+                <th>通道名称</th>
+                <th>剩余金额</th>
+                <th>下发金额</th>
+                <!-- <th>查询余额</th>
+                {if condition="isset($depositInfo['return_json']['result_code']) || isset($depositInfo['return_json']['Err_Code']) && $depositInfo['return_json']['Result'] == 'SUCCESS'"}
+                {else /}
+                    <th>查询代付结果</th>
+                    <th>代付返回</th>
+                    <th>申请代付</th>
+                {/if} -->
+            </tr>
+            </thead>
+            <tbody>
+
+            {volist name="channel" id="vo"}
+                <tr>
+                    <td>{$vo.name_cn}</td>
+                    <td>{:bcadd($vo.channel_money, 0, 2)}</td>
+                    <td>
+                        <input type="text" name="channel_money[]"  placeholder="请输入金额" autocomplete="off" class="layui-input">
+                        <input type="hidden" name="channel[]" value="{$vo.id}">
+                        <input type="hidden" name="balance[]" value="{$vo.channel_money}">
+                        <input type="hidden" name="channel_name[]" value="{$vo.name_cn}">
+                    </td>
+                    <!-- <td>
+                        <span class="layui-btn layui-btn-danger layui-btn-xs" onclick="queryDfBalance()">查询余额</span>
+                    </td>
+                    {if condition="isset($depositInfo['return_json']['result_code']) || isset($depositInfo['return_json']['Err_Code']) && $depositInfo['return_json']['Result'] == 'SUCCESS'"}
+                    {else /}
+                        <td>
+                            <span class="layui-btn layui-btn-danger layui-btn-xs" onclick="queryDfStatus('{$depositInfo.deposit_order_id}', '{$vo.id}')">查询代付结果</span>
+                        </td>
+                        <td id="apply_result">-
+                        </td>
+                        <td>
+                            <span class="layui-btn layui-btn-danger layui-btn-xs" onclick="applayDfQuery('{$depositInfo.deposit_order_id}', '{$vo.id}')">全额代付</span>
+                        </td>
+                    {/if} -->
+                </tr>
+            {/volist}
+            </tbody>
+        </table>
+        <div style="width: 200px;margin: 2% 0 2% 0;">
+            <select name="status" >
+                <option value="">请选择结算状态</option>
+                <option value="2" {if $status eq 2} selected {/if}>处理中</option>
+                <option value="3" {if $status eq 3} selected {/if}>已处理</option>
+                <option value="4">驳回</option>
+            </select>
+        </div>
+        <input type="hidden" name="id" value="{$deposit_id}">
+        <input type="hidden" name="member_id" value="{$member_id}">
+        <input type="hidden" name="money" value="{$money}">
+        <span  class="layui-btn" lay-filter="add" lay-submit="">提交</span>
+    </form>
+</div>
+
+{/block}
+
+{block name="js"}
+<script>
+    layui.use(['form','layer'], function(){
+        $ = layui.jquery;
+        form = layui.form
+            ,layer = layui.layer;
+        //监听提交
+        form.on('submit(add)', function(data){
+            layer.load();
+            $.ajax({
+                url: "{:url('deposit_edit')}",
+                type:"POST",
+                data: data.field,
+                success:function(result){
+                    if(result.status == 1){
+                        layer.closeAll();
+                        swal("成功", result.msg, "success");
+                        setTimeout(function(){
+                            x_admin_close();
+                        },2000)
+                    }else{
+                        layer.closeAll();
+                        swal('失败!!!', result.msg, "error");
+                    }
+                }
+            });
+            return false;
+        });
+    });
+
+    function applayDfQuery(deposit_order_id, channel_id)
+    {
+        layer.load();
+        $.ajax({
+            url: "/df_request/"+deposit_order_id+'/'+channel_id,
+            type:"POST",
+            data: {deposit_order_id: deposit_order_id, channel_id: channel_id},
+            success:function(result){
+                console.log(result);
+                layer.closeAll();
+                layer.msg(result.msg);
+                if(result.code == 200){
+                    $('#apply_result').html('<span style="color:green; font-weight: bold;">'+result.msg+'</span>');
+                }else{
+                    $('#apply_result').html('<span style="color:red; font-weight: bold;">'+result.msg+'</span>');
+                }
+            }
+        });
+
+    }
+
+
+    function queryDfBalance()
+    {
+        layer.load();
+        $.ajax({
+            url: "/df_query",
+            type:"POST",
+            data: {},
+            dataType: 'json',
+            success:function(result){
+                console.log(result);
+                layer.closeAll();
+                if(result.Err_Code == 0 && result.Result == 'SUCCESS'){
+                    str = '代付余额：' + result.Balance + '元，冻结余额：' + result.Freeze + '元';
+                }else{
+                    str = '代付查询失败！';
+                }
+                layer.msg(str);
+                $('#apply_result').html(str);
+            }
+        });
+
+    }
+
+    function queryDfStatus(deposit_order_id, channel_id)
+    {
+        layer.load();
+        $.ajax({
+            url: "/df_query_status/"+deposit_order_id+'/'+channel_id,
+            type:"POST",
+            data: {deposit_order_id: deposit_order_id, channel_id: channel_id},
+            success:function(result){
+                console.log(result);
+                layer.closeAll();
+                layer.msg(result.msg);
+                if(result.code == 200){
+                    $('#apply_result').html('<span style="color:green; font-weight: bold;">'+result.msg+'</span>');
+                }else{
+                    $('#apply_result').html('<span style="color:red; font-weight: bold;">'+result.msg+'</span>');
+                }
+            }
+        });
+
+    }
+</script>
+{/block}

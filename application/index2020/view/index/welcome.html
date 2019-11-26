@@ -1,0 +1,141 @@
+{extend name="common/common" /}
+
+{block name="css"}
+<style>
+    .layui-col-xs2 {
+        width: 28%;
+    }
+</style>
+{/block}
+
+{block name="body"}
+<div class="x-body layui-anim layui-anim-up">
+    <blockquote class="layui-elem-quote">欢迎您：
+        <span class="x-red">{$Think.session._member.username}（{if condition="$Think.const.AGENT==2"}代理商户{else /}普通商户{/if}）</span>！当前时间为：{:date("Y-m-d H:i:s")}</blockquote>
+    {if AGENT eq 2}
+        <div class="layui-field-box" >
+        <div class="layui-col-md12">
+            <div class="layui-card">
+                <div class="layui-card-body">
+                    <div class="layui-carousel x-admin-carousel x-admin-backlog" lay-anim="" lay-indicator="inside" lay-arrow="none" style="width: 100%; height: 90px;">
+                        <div carousel-item="">
+                            <ul class="layui-row layui-col-space10 layui-this">
+                                <li class="layui-col-xs2">
+                                    <a href="javascript:;" class="x-admin-backlog-body">
+                                        <h3>账户余额（元）</h3>
+                                        <p>
+                                            <cite>{:bcadd($memberInfo.balance, 0, 2)}</cite></p>
+                                    </a>
+                                </li>
+                                <li class="layui-col-xs2">
+                                    <a href="javascript:;" class="x-admin-backlog-body">
+                                        <h3>冻结资金（元）</h3>
+                                        <p>
+                                            <cite>{:bcadd($memberInfo.blockedbalance, 0, 2)}</cite></p>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {else/}
+        <div class="layui-field-box">
+            <div class="layui-col-md12">
+                <div class="layui-card">
+                    <div class="layui-card-body">
+                        <div class="layui-carousel x-admin-carousel x-admin-backlog" lay-anim="" lay-indicator="inside" lay-arrow="none" style="width: 100%; height: 90px;">
+                            <div carousel-item="">
+                                <ul class="layui-row layui-col-space10 layui-this">
+                                    <li class="layui-col-xs2">
+                                        <a href="javascript:;" class="x-admin-backlog-body">
+                                            <h3>今日总订单（笔）</h3>
+                                            <p>
+                                                <cite>{$memberInfo.count}</cite></p>
+                                        </a>
+                                    </li>
+                                    <li class="layui-col-xs2">
+                                        <a href="javascript:;" class="x-admin-backlog-body">
+                                            <h3>今日成功订单（笔）</h3>
+                                            <p>
+                                                <cite>{$memberInfo.successCount}</cite></p>
+                                        </a>
+                                    </li>
+                                    <li class="layui-col-xs2">
+                                        <a href="javascript:;" class="x-admin-backlog-body">
+                                            <h3>今日未支付订单（笔）</h3>
+                                            <p>
+                                                <cite>{$memberInfo.count - $memberInfo.successCount}</cite></p>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="layui-field-box" >
+        <div class="layui-col-md12">
+            <div class="layui-card">
+                <div class="layui-card-body">
+                    <div class="layui-carousel x-admin-carousel x-admin-backlog" lay-anim="" lay-indicator="inside" lay-arrow="none" style="width: 100%; height: 90px;">
+                        <div carousel-item="">
+                            <ul class="layui-row layui-col-space10 layui-this">
+                                <li class="layui-col-xs2">
+                                    <a href="javascript:;" class="x-admin-backlog-body">
+                                        <h3>今日总入金（元）</h3>
+                                        <p>
+                                            <cite>{:bcadd($memberInfo.successMoney, 0, 2)}</cite></p>
+                                    </a>
+                                </li>
+                                <li class="layui-col-xs2">
+                                    <a href="javascript:;" class="x-admin-backlog-body">
+                                        <h3>账户余额（元）</h3>
+                                        <p>
+                                            <cite>{:bcadd($memberInfo.balance, 0, 2)}</cite></p>
+                                    </a>
+                                </li>
+                                <li class="layui-col-xs2">
+                                    <a href="javascript:;" class="x-admin-backlog-body">
+                                        <h3>冻结资金（元）</h3>
+                                        <p>
+                                            <cite>{:bcadd($memberInfo.blockedbalance, 0, 2)}</cite></p>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {/if}
+    <fieldset class="layui-elem-field" style="margin-bottom: 16%;">
+        <legend>系统公告</legend>
+        <div class="layui-field-box">
+            <table class="layui-table" lay-skin="line">
+                <tbody>
+                <tr>
+                    <td >
+                        <a class="x-a" href="javascript:;" target="_blank">{$Think.config.platform_name_cn}支付平台2.0   全新升级上线了 ！！！</a>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </fieldset>
+    <blockquote class="layui-elem-quote layui-quote-nm" >
+        <p>{$Think.config.platform_name_cn}支付平台</p>
+        <br>
+        Copyright © 2007-2019 ksk.com. 保留所有权利
+    </blockquote>
+</div>
+{/block}
+
+{block name="js"}
+
+{/block}

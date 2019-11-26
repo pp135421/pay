@@ -1,0 +1,126 @@
+{extend name="common/common" /}
+
+{block name="css"}
+
+{/block}
+
+{block name="body"}
+<div class="x-body">
+    <input type="hidden" name="id" value="{$channelInfo.id}">
+    <input type="hidden" name="name_en" value="{$channelInfo.name_en}">
+    <input type="hidden" name="relate_key" value="{:isset($relate_key) ? urlencode($relate_key) : ''}">
+    <div class="layui-form-item">
+        <label class="layui-form-label">
+            测试金额
+        </label>
+        <div class="layui-input-inline">
+            <input type="text" name="amount"
+                   class="layui-input" value="">
+        </div>
+        <!-- <span style="display: none;" id="qrcode_btn" class="layui-btn layui-btn-danger" title="" onclick="createImg(this)">
+                点击生成二维码图片
+            </span> -->
+    </div>
+    <div class="layui-form-item layui-form-text">
+        <label class="layui-form-label">点击链接</label>
+        <div class="layui-input-block">
+            <a style="color: green;" id="desc" href="javascript:;" target="_blank"></a>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">
+            <!--二维码-->
+        </label>
+        <div class="layui-input-inline">
+            <img id="qrcode_img" src="" width="200">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">
+        </label>
+        <button  class="layui-btn" id="btn">
+            提交
+        </button>
+    </div>
+</div>
+{/block}
+
+{block name="js"}
+<script type="text/javascript">
+    layui.use('form', function() {
+        form = layui.form; //只有执行了这一步，部分表单元素才会自动修饰成功
+        form.render();
+    });
+
+    $(document).keydown(function (event) {
+        if(event.keyCode==13){
+            test();
+        }
+    });
+
+    $("#btn").click(function(){
+        test();
+    });
+
+    function test()
+    {
+        //加载效果可卡重复点击
+        layer.load();
+        var data = {
+            'id': $('input[name=id]').val(),
+            'amount': $('input[name=amount]').val(),
+            'name_en': $('input[name=name_en]').val(),
+            'relate_key': $('input[name=relate_key]').val(),
+        };
+        //先清除之前的二维码图片和链接
+        $('#qrcode_img').attr('src', '');
+        $('#desc').html('');
+        $('#desc').attr('href', "javascript:;");
+        $.ajax({
+            url: '{:url("test")}',
+            type:'POST',
+            data: data,
+            dataType:'json',
+            success:function(result){
+                layer.msg(result.msg);
+                setTimeout(function(){
+                    //关闭加载效果
+                    layer.closeAll();
+                    //关闭当前子窗口
+                    if(result.code == 200){
+                        $('#qrcode_btn').attr('title', result.data.qrcode);
+                        $('#qrcode_btn').removeAttr('style');
+                        $('#desc').text(result.data.qrcode);
+                        $('#desc').attr('href', result.data.qrcode);
+                    }
+                }, 1000);
+            }
+        });
+    }
+    function html2Escape(sHtml) {
+        return sHtml.replace(/[<>&"]/g,function(c){return {'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c];});
+    }
+
+    function createImg(obj)
+    {
+        //加载效果可卡重复点击
+        layer.load();
+        $.ajax({
+            url: '{:url("create_img")}',
+            type:'POST',
+            data: {get_url: obj.title},
+            dataType:'json',
+            success:function(result){
+                console.log(result);
+                layer.msg(result.msg);
+                setTimeout(function(){
+                    //关闭加载效果
+                    layer.closeAll();
+                    //关闭当前子窗口
+                    if(result.code == 200) $('#qrcode_img').attr('src', result.msg);
+                }, 1000);
+            }
+        });
+    }
+</script>
+{/block}

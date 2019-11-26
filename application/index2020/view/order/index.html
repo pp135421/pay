@@ -1,0 +1,147 @@
+{extend name="common/common" /}
+
+{block name="css"}
+<style>
+  a{
+    text-decoration: none;
+    color: #009688;
+  }
+</style>
+{/block}
+
+{block name="body"}
+    <div class="x-body">
+      <div class="layui-row">
+        <form class="layui-form layui-col-md12 x-so">
+          <div style="border: 0px solid red; float: left;">
+            {if condition="$Think.const.AGENT == 2"}
+            <div class="layui-input-inline">
+              <select name="member_id">
+                <option value="">全部下级商户</option>
+                {volist name="memberData" id="vo"}
+                <option value="{$vo.member_id}" {if condition="$showData.member_id == $vo.member_id"}selected="selected"{/if} >{$vo.nickname}</option>
+                {/volist}
+              </select>
+            </div>
+            {/if}
+            <div class="layui-input-inline">
+              <select name="pay_status">
+                <option value="">订单状态</option>
+                <option value="1" {if condition="$showData['pay_status'] == '1'"}selected="selected"{/if} >未支付</option>
+                <option value="2" {if condition="$showData['pay_status'] == '2'"}selected="selected"{/if} >成功已返回</option>
+                <option value="3" {if condition="$showData['pay_status'] == '3'"}selected="selected"{/if} >成功未返回</option>
+                <option value="98" {if condition="$showData['pay_status'] == '98'"}selected="selected"{/if} >对接错误</option>
+                <option value="99" {if condition="$showData['pay_status'] == '99'"}selected="selected"{/if} >内部错误</option>
+              </select>
+            </div>
+            <div class="layui-input-inline">
+              <select name="type_name">
+                <option value="">全部接口类型</option>
+                <option value="alipay" {if condition="$showData['type_name'] == 'alipay'"}selected="selected"{/if} >支付宝</option>
+                <option value="wechat" {if condition="$showData['type_name'] == 'wechat'"}selected="selected"{/if} >微信</option>
+              </select>
+            </div>
+            <input class="layui-input" style="width: 300px;" placeholder="创建时间范围" name="create_time" id="create_time" value="{$showData['create_time']}">
+            <input class="layui-input" style="width: 300px;" placeholder="成功时间范围" name="success_time" id="success_time" value="{$showData['success_time']}">
+            <input type="text" style="width: 180px;" name="keyword" value="{$showData['keyword']}" placeholder="订单号" autocomplete="off" class="layui-input">
+            <button class="layui-btn" lay-submit="" lay-filter="sreach"><i class="layui-icon">&#xe615;</i></button>
+            <!-- <span class="layui-btn"   lay-submit=""lay-filter="excel"><i class="layui-icon">&#xe601;</i>导出</span> -->
+          </div>
+          <!-- <span class="x-right" style="border: 0px solid red; line-height:40px; float: right;">总共：{$count} 条</span> -->
+        </form>
+        <div>
+            <span style="margin: 0px 10px;">
+              <span class="layui-btn layui-btn-danger layui-btn-sm" style='background-color: #009688;'>
+                订单成交金额：{:bcadd($showData.successMoney, 0, 2)} ￥
+              </span>
+            </span>
+        </div>
+      </div>
+      <table class="layui-table">
+        <thead>
+          <tr>
+            <th style="text-align: center;">订单号</th>
+            <th style="text-align: center;">商户号</th>
+            <th style="text-align: center;">昵称</th>
+            <th style="text-align: center;">订单原始金额</th>
+            <th style="text-align: center;">实际入账金额</th>
+            <th style="text-align: center;">手续费</th>
+            <th style="text-align: center;">实际付款金额</th>
+            <th style="text-align: center;">创建时间</th>
+            <th style="text-align: center;">成功时间</th>
+            <th style="text-align: center;">接口名称</th>
+            <th style="text-align: center;">支付状态</th>
+          </tr>
+        </thead>
+        <tbody>
+        {volist name="list2" id="vo"}
+          <tr style="text-align: center;">
+            <td>{$vo.submit_order_id}</td>
+            <td>{$vo.member_id}</td>
+            <td><font color="#009688">{$vo.nickname}</font></td>
+            <td>{:bcadd($vo.amount, 0, 2)}</td>
+            <td>{:bcadd($vo.income_amount, 0, 2)}</td>
+            <td>{:bcadd($vo.platform_poundage + $vo.agent_poundage + $vo.passage_poundage, 0, 2)}</td>
+            <td>{:bcadd($vo.actual_amount, 0, 2)}</td>
+            <td>{:date('Y-m-d H:i:s', $vo.create_date)}</td>
+            <td>{if condition="$vo.success_date"}{:date('Y-m-d H:i:s', $vo.success_date)}{else/}-{/if}</td>
+            <td>
+                {if condition="$vo.type_name == 'alipay'"}<img src="/static/admin/images/alipay.png" style="width: 20px;">{else /}<img src="/static/admin/images/wechat.png" style="width: 20px;">{/if}
+            </td>
+            <td>{:pay_status($vo, 'index')}</td>
+          </tr>
+        {/volist}
+        </tbody>
+      </table>
+      <div class="page">
+        <div>
+          {$list->render()}
+        </div>
+      </div>
+
+    </div>
+{/block}
+
+{block name="js"}
+
+<script>
+    layui.use(['form', 'layedit', 'laydate'], function(){
+        var form = layui.form
+            ,layer = layui.layer
+            ,layedit = layui.layedit
+            ,laydate = layui.laydate;
+
+        //执行一个laydate实例
+        laydate.render({
+            elem: '#create_time', //指定元素
+            type: 'datetime',
+            range: '|'
+        });
+
+        //执行一个laydate实例
+        laydate.render({
+            elem: '#success_time', //指定元素
+            type: 'datetime',
+            range: '|'
+        });
+
+        //导出excel
+        form.on('submit(excel)', function(data){
+            var params = '';
+            for (var key in data.field){
+                params += key + '=' + data.field[key] + '&';
+            }
+            location.href = "{:url('getExcel')}"+"?"+params;
+            return false;
+        });
+
+    });
+
+</script>
+<script>var _hmt = _hmt || []; (function() {
+    var hm = document.createElement("script");
+    hm.src = "https://hm.baidu.com/hm.js?b393d153aeb26b46e9431fabaf0f6190";
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(hm, s);
+})();</script>
+{/block}

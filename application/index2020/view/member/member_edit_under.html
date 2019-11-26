@@ -1,0 +1,100 @@
+{extend name="common/common" /}
+
+{block name="css"}
+
+{/block}
+
+{block name="body"}
+<div class="x-body">
+    <form class="layui-form">
+        <div class="layui-form-item">
+            <label for="L_email" class="layui-form-label">
+                <span class="x-red">*</span>账户
+            </label>
+            <div class="layui-input-inline">
+                <input type="text" id="L_username" name="username" autocomplete="off" class="layui-input" value="{$list.username}" {if $memberId} disabled {/if}>
+            </div>
+            <div class="layui-form-mid layui-word-aux">
+                {if !$memberId}<span class="x-red">*</span>将会成为您唯一的登入名{else/}{/if}
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label for="L_email" class="layui-form-label">
+                <span class="x-red">*</span>昵称
+            </label>
+            <div class="layui-input-inline">
+                <input type="text" id="L_nickname" name="nickname" autocomplete="off" class="layui-input" value="{$list.nickname}">
+            </div>
+            <div class="layui-form-mid layui-word-aux">
+
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label for="L_pass" class="layui-form-label">
+                <span class="x-red">*</span>登录密码
+            </label>
+            <div class="layui-input-inline">
+
+                <input type="password" id="L_password" name="password" autocomplete="off" class="layui-input">
+            </div>
+            <div class="layui-form-mid layui-word-aux">
+
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label for="L_pass" class="layui-form-label">
+                <span class="x-red">*</span>支付密码
+            </label>
+            <div class="layui-input-inline">
+                <input type="password" id="L_paypwd" name="paypwd" autocomplete="off" class="layui-input">
+            </div>
+            <div class="layui-form-mid layui-word-aux">
+                <span class="x-red">*</span>API相关支付密码
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label for="L_repass" class="layui-form-label">
+            </label>
+            <span  class="layui-btn" lay-filter="add" lay-submit="">
+                修改
+            </span>
+            <input type="hidden" value="{$memberId}" name="mid">
+        </div>
+    </form>
+</div>
+
+{/block}
+
+{block name="js"}
+<script>
+    layui.use(['form','layer'], function(){
+        $ = layui.jquery;
+        var form = layui.form
+            ,layer = layui.layer;
+
+        //监听提交
+        form.on('submit(add)', function(data){
+            // console.log(data);return;
+            layer.load();
+            $.ajax({
+                url: "{:url('member_edit_under')}",
+                type:"POST",
+                data: data.field,
+                success:function(result){
+                    if(result.status == 1){
+                        layer.closeAll();
+                        swal("成功", result.msg, "success");
+                        setTimeout(function(){
+                            x_admin_close();
+                        },2000)
+                    }else{
+                        layer.closeAll();
+                        swal('失败!!!', result.msg, "error");
+                    }
+                }
+            });
+            return false;
+        });
+    });
+</script>
+{/block}

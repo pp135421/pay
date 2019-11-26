@@ -1,0 +1,131 @@
+{extend name="common/common" /}
+
+{block name="css"}
+<style>
+  .layui-table td, .layui-table th{
+    font-size: 1px!important;
+  }
+  a{
+    text-decoration: none;
+    color: #009688;
+  }
+  table tr:nth-of-type(even){
+      background: #f7f7f7;
+  }
+</style>
+{/block}
+
+{block name="body"}
+    <div class="x-body">
+      <div class="layui-row">
+
+        <form class="layui-form layui-col-md12 x-so">
+          <div style="border: 0px solid red; float: left;">
+            <input class="layui-input" style="width: 200px;" placeholder="变动时间范围" name="create_time" id="create_time" value="{$showData['create_time']}">
+            <div class="layui-input-inline">
+              <select name="channel_id">
+                <option value="">全部通道</option>
+                {volist name="channelData" id="vo"}
+                <option value="{$vo.id}" {if condition="$showData['channel_id'] == $vo.id"}selected="selected"{/if} >{$vo.name_cn}</option>
+                {/volist}
+              </select>
+            </div>
+            <div class="layui-input-inline">
+              <select name="type_name">
+                <option value="">全部接口类型</option>
+                <option value="alipay" {if condition="$showData['type_name'] == 'alipay'"}selected="selected"{/if} >支付宝</option>
+                <option value="wechat" {if condition="$showData['type_name'] == 'wechat'"}selected="selected"{/if} >微信</option>
+              </select>
+            </div>
+            <div class="layui-input-inline">
+              <select name="change_type" >
+                <option value="">资金变动类型</option>
+                {volist name="change_type" id="vo"}
+                <option value="{$key}" {if condition="$showData['change_type'] == $key"}selected="selected"{/if} >{$vo}</option>
+                {/volist}
+              </select>
+            </div>
+            <input type="text" style="width: 250px;" name="keyword" value="{$showData['keyword']}" placeholder="平台订单号 / 下游订单号 / 商户号" autocomplete="off" class="layui-input">
+            <button class="layui-btn" lay-submit="" lay-filter="sreach"><i class="layui-icon">&#xe615;</i></button>
+           <!--  <a class="layui-btn layui-btn-small" style="line-height:1.6em;" href="javascript:location.replace(location.href);" title="刷新">
+              <i class="layui-icon" style="line-height:30px">ဂ</i>
+            </a> -->
+          </div>
+          <span class="x-right" style="border: 0px solid red; line-height:40px; float: right;">总共：{$count} 条</span>
+        </form>
+      </div>
+
+      <table class="layui-table">
+        <thead>
+          <tr>
+            <th style="text-align: center;">平台订单号</th>
+            <th style="text-align: center;">下游订单号</th>
+            <th style="text-align: center;">商户号</th>
+            <th style="text-align: center;">昵称</th>
+            <th style="text-align: center;">变动前金额</th>
+            <th style="text-align: center;">变动金额</th>
+            <th style="text-align: center;">变动后金额</th>
+            <th style="text-align: center;">变动时间</th>
+            <th style="text-align: center;">资金变动类型</th>
+            <th style="text-align: center;">通道类型</th>
+            <th style="text-align: center;">通道名称</th>
+          </tr>
+        </thead>
+        <tbody>
+        {volist name="list" id="vo"}
+          <tr style="text-align: center;">
+            <td>{$vo.platform_order_id}</td>
+            <td>{$vo.submit_order_id}</td>
+            <td><a href="{$Think.config.member_jump_url}?member_id={$vo.member_id}" target="_blank">{$vo.member_id}</a></td>
+            <td>{$vo.member.nickname}</td>
+            <td>{$vo.before_money}</td>
+            <td><font color="green">{$vo.change_money}</font></td>
+            <td>{$vo.after_money}</td>
+            <td>{:date('Y-m-d H:i:s', $vo.create_date)}</td>
+            <td>{:change_type($vo.change_type)}</td>
+            <td>
+                {if condition="$vo.type_name == 'alipay'"}<img src="/static/admin/images/alipay.png" style="width: 20px;">{else /}<img src="/static/admin/images/wechat.png" style="width: 20px;">{/if}
+            </td>
+            <td>{$vo.channel_name}</td>
+          </tr>
+        {/volist}
+        </tbody>
+      </table>
+      <div class="page">
+        <div>
+          {$list->render()}
+        </div>
+      </div>
+
+    </div>
+{/block}
+
+{block name="js"}
+
+<script>
+    layui.use('laydate', function(){
+        var laydate = layui.laydate;
+
+        //执行一个laydate实例
+        laydate.render({
+            elem: '#create_time', //指定元素
+            type: 'datetime',
+            range: '|'
+        });
+
+        //执行一个laydate实例
+        laydate.render({
+            elem: '#success_time', //指定元素
+            type: 'datetime',
+            range: '|'
+        });
+    });
+
+</script>
+<script>var _hmt = _hmt || []; (function() {
+    var hm = document.createElement("script");
+    hm.src = "https://hm.baidu.com/hm.js?b393d153aeb26b46e9431fabaf0f6190";
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(hm, s);
+})();</script>
+{/block}

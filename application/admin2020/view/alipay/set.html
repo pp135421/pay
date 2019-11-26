@@ -1,0 +1,75 @@
+{extend name="common/common" /}
+
+{block name="css"}
+
+{/block}
+
+{block name="body"}
+<div class="x-body">
+    <input type="hidden"  name="id"  placeholder="" value="{if condition='$info'}{$info.id}{else /}0{/if}">
+    <div class="layui-form-item">
+        <label class="layui-form-label">
+            支付宝账户
+        </label>
+        <div class="layui-input-inline">
+            <input type="text" name="account"
+                   class="layui-input" value="{if condition='$info'}{$info.account}{/if}">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">
+            昵称
+        </label>
+        <div class="layui-input-inline">
+            <input type="text" name="name"
+                   class="layui-input" value="{if condition='$info'}{$info.name}{/if}">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">
+            appid
+        </label>
+        <div class="layui-input-inline">
+            <input type="text" name="appid"
+                   class="layui-input" value="{if condition='$info'}{$info.appid}{/if}">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">
+        </label>
+        <button  class="layui-btn" id="btn" lay-filter="set" lay-submit="">
+            {if condition='$info'}修改{else /}添加{/if}
+        </button>
+    </div>
+</div>
+{/block}
+
+{block name="js"}
+<script type="text/javascript">
+    $("#btn").click(function(){
+        var data = {
+            'id': $('input[name=id]').val(),
+            'account': $('input[name=account]').val(),
+            'name': $('input[name=name]').val(),
+            'appid': $('input[name=appid]').val(),
+        };
+        //加载效果可卡重复点击
+        layer.load();
+        $.ajax({
+            url: '{:url("set")}',
+            type:'POST',
+            data: data,
+            dataType:'json',
+            success:function(result){
+                layer.msg(result.msg);
+                setTimeout(function(){
+                    //关闭加载效果
+                    layer.closeAll();
+                    //关闭当前子窗口
+                    if(result.code == 200) x_admin_close(1);
+                }, 1000);
+            }
+        });
+    });
+</script>
+{/block}

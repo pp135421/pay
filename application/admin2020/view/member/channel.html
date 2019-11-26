@@ -1,0 +1,190 @@
+{extend name="common/common" /}
+
+{block name="css"}
+
+{/block}
+
+{block name="body"}
+<form class="layui-form" action="">
+    <table class="layui-table" lay-skin="line" lay-even>
+        <thead>
+        <tr>
+            <th>接口名称</th>
+            <th>用户费率<span style="color:red;">（3%=0.03）</span></th>
+            <th>接口状态</th>
+            <th>操作</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td><img src="/static/admin/images/alipay.png" style="width: 25px;">&ensp;&ensp;支付宝</td>
+            <td>
+                <input type="text" name="alipay_rate" placeholder="请输入用户费率" value="{$memberInfo.alipay_rate}" autocomplete="off" class="layui-input">
+            </td>
+            <td>
+                {if condition="$memberInfo.regulation_alipay == 1"}
+                <input type="checkbox" name="alipay_status" lay-skin="switch" lay-filter="alipay" {if condition="isset($alipayArr[0]) && $alipayArr.0.status == 1"}checked{/if} lay-text="开启|禁用" >
+                {else /}
+                    <input type="checkbox" name="alipay_status" lay-skin="switch" lay-filter="alipay" {if condition="in_array(1, array_column($alipayArr2, 'status'))"}checked{/if} lay-text="开启|禁用" >
+                {/if}
+            </td>
+            <td class="td-manage">
+              <input type="radio" name="alipayRadio" lay-filter="alipayRadio" value="1" title="单独" {if $memberInfo.regulation_alipay == 1}checked{/if}>
+              <input type="radio" name="alipayRadio" lay-filter="alipayRadio" value="2" title="轮询" {if $memberInfo.regulation_alipay == 2}checked{/if}>
+                <div id="alipayChannelId" style="display: {if $memberInfo.regulation_alipay == 1}block{else /}none{/if};">
+                <select name="alipayChannelId">
+                    <option value="">单独：添加支付宝通道</option>
+                    {volist name="channelData" id="vo"}
+                    {if $vo.type_name == 'alipay'}
+                    <option value="{$vo.id}" {if condition="isset($alipayArr[0]) && $vo.id == $alipayArr.0.channel_id"}selected{/if}>{$vo.name_cn}_{:bcadd($vo.rate * 100, 0, 2)}% {if $vo.status == 1}√{else /}×{/if}</option>
+                    {/if}
+                    {/volist}
+                </select>
+                </div>
+                <div id="alipayChannelId2" style="display: {if $memberInfo.regulation_alipay == 2}block{else /}none{/if};">
+                    <select name="alipayChannelId2" lay-filter="alipayChannelId2">
+                        <option value="">轮询：添加支付宝通道</option>
+                        {volist name="channelData" id="vo"}
+                        {if $vo.type_name == 'alipay'}
+                        <option value="{$vo.id}">{$vo.name_cn}_{:bcadd($vo.rate * 100, 0, 2)}%（{:bcadd($vo.min_money_poll, 0, 0)}~{:bcadd($vo.max_money_poll, 0, 0)} | <span style="color: red;">{$vo.weight}次</span>） {if $vo.status == 1}√{else /}×{/if}</option>
+                        {/if}
+                        {/volist}
+                    </select>
+                    <div id="alipayChannelData">
+                        {volist  name="alipayArr2" id="vo"}
+                        {if $vo.regulation == '2'}
+                        <div style="margin: 10px 0px;"><input type="hidden" style="border: 0px solid white; width: 120px; height: 25px; background-color: white; margin: 3px 0px;" name="alipayChannelIdText[]"   value="{$vo.channel_id}"><span>{$vo.channel_name}（{:bcadd($vo.min_money_poll, 0, 0)}~{:bcadd($vo.max_money_poll, 0, 0)} | <span style="color: red;">{$vo.weight}次</span> {if $vo.status == 1}√{else /}×{/if}</span>&ensp;&ensp;<span style="color: #009688; cursor: pointer;" onclick="x_admin_show('编辑通道_{$vo.channel_name}', '{:url("channel/set", ['id'=>$vo.channel_id, 'only_money'=>1])}', 500, 400)">编辑</span>&ensp;&ensp;<span style="color: red; cursor: pointer;" onclick="this.parentNode.parentNode.removeChild(this.parentNode);">删除</span></div>
+                        {/if}
+                        {/volist}
+                    </div>
+                </div>
+            </td>
+        </tr>
+        <tr>
+            <td><img src="/static/admin/images/wechat.png" style="width: 25px;">&ensp;&ensp;微信</td>
+            <td>
+                <input type="text" name="wechat_rate" placeholder="请输入用户费率" value="{$memberInfo.wechat_rate}" autocomplete="off" class="layui-input">
+            </td>
+            <td>
+                {if condition="$memberInfo.regulation_wechat == 1"}
+                <input type="checkbox" name="wechat_status" lay-skin="switch" lay-filter="wechat" {if condition="isset($wechatArr[0]) && $wechatArr.0.status == 1"}checked{/if} lay-text="开启|禁用" >
+                {else /}
+                    <input type="checkbox" name="wechat_status" lay-skin="switch" lay-filter="wechat" {if condition="in_array(1, array_column($wechatArr2, 'status'))"}checked{/if} lay-text="开启|禁用" >
+                {/if}
+            </td>
+            <td class="td-manage">
+              <input type="radio" name="wechatRadio" lay-filter="wechatRadio" value="1" title="单独" {if $memberInfo.regulation_wechat == 1}checked{/if}>
+              <input type="radio" name="wechatRadio" lay-filter="wechatRadio" value="2" title="轮询" {if $memberInfo.regulation_wechat == 2}checked{/if}>
+                <div id="wechatChannelId" style="display: {if $memberInfo.regulation_wechat == 1}block{else /}none{/if};">
+                <select name="wechatChannelId">
+                    <option value="">单独：添加微信通道</option>
+                    {volist name="channelData" id="vo"}
+                    {if $vo.type_name == 'wechat'}
+                    <option value="{$vo.id}" {if condition="isset($wechatArr[0]) && $vo.id == $wechatArr.0.channel_id"}selected{/if}>{$vo.name_cn}_{:bcadd($vo.rate * 100, 0, 2)}% {if $vo.status == 1}√{else /}×{/if}</option>
+                    {/if}
+                    {/volist}
+                </select>
+                </div>
+                <div id="wechatChannelId2" style="display: {if $memberInfo.regulation_wechat == 2}block{else /}none{/if};">
+                    <select name="wechatChannelId2" lay-filter="wechatChannelId2">
+                        <option value="">轮询：添加微信通道</option>
+                        {volist name="channelData" id="vo"}
+                        {if $vo.type_name == 'wechat'}
+                        <option value="{$vo.id}">{$vo.name_cn}_{:bcadd($vo.rate * 100, 0, 2)}%（{:bcadd($vo.min_money_poll, 0, 0)}~{:bcadd($vo.max_money_poll, 0, 0)} | <span style="color: red;">{$vo.weight}次</span>） {if $vo.status == 1}√{else /}×{/if}</option>
+                        {/if}
+                        {/volist}
+                    </select>
+                    <div id="wechatChannelData">
+                        {volist  name="wechatArr2" id="vo"}
+                        {if $vo.regulation == '2'}
+                        <div style="margin: 10px 0px;"><input type="hidden" style="border: 0px solid white; width: 120px; height: 25px; background-color: white; margin: 3px 0px;" name="wechatChannelIdText[]"   value="{$vo.channel_id}"><span>{$vo.channel_name}（{:bcadd($vo.min_money_poll, 0, 0)}~{:bcadd($vo.max_money_poll, 0, 0)} | <span style="color: red;">{$vo.weight}次</span>） {if $vo.status == 1}√{else /}×{/if}</span>&ensp;&ensp;<span style="color: #009688; cursor: pointer;" onclick="x_admin_show('编辑通道_{$vo.channel_name}', '{:url("channel/set", ['id'=>$vo.channel_id, 'only_money'=>1])}', 500, 400)">编辑</span>&ensp;&ensp;<span style="color: red; cursor: pointer;" onclick="this.parentNode.parentNode.removeChild(this.parentNode);">删除</span></div>
+                        {/if}
+                        {/volist}
+                    </div>
+                </div>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+    <div class="layui-form-item" style="margin-top:5%;">
+        <label for="L_repass" class="layui-form-label">
+        </label>
+        <span  class="layui-btn" lay-filter="add" lay-submit="">
+            修改
+        </span>
+    </div>
+    <input type="hidden" value="{$member_id}" name="member_id">
+</form>
+{/block}
+
+{block name="js"}
+<script>
+    layui.use(['form','layer'], function(){
+        $ = layui.jquery;
+        var form = layui.form
+            ,layer = layui.layer;
+        var form = layui.form;
+
+        //商户的支付宝单独、轮询切换
+        form.on('radio(alipayRadio)', function (data) {
+            var value = data.elem.value;
+            if(value == 1){
+                $('#alipayChannelId').css('display', 'block');
+                $('#alipayChannelId2').css('display', 'none');
+            }else{
+                $('#alipayChannelId').css('display', 'none');
+                $('#alipayChannelId2').css('display', 'block');
+            }
+        });
+        //商户的支付宝单独、轮询切换
+        form.on('select(alipayChannelId2)', function (data) {
+            var channel_id = data.elem.value;
+            if(!channel_id) return;
+            var channel_name = $(data.elem).find("option:selected").text();
+            var str = '<div style="margin: 10px 0px;"><input type="hidden" style="border: 0px solid white; width: 120px; height: 25px; background-color: white; margin: 3px 0px;" name="alipayChannelIdText[]"   value="' + channel_id + '"><span>' + channel_name + '</span>&ensp;&ensp;<span style="color: #009688; cursor: pointer;" onclick="x_admin_show(\'编辑通道_' + channel_name + '\', \'/admin2020/channel/set/only_money/1/id/'+channel_id+'\', 500, 400)">编辑</span>&ensp;&ensp;<span style="color: red; cursor: pointer;" onclick="this.parentNode.parentNode.removeChild(this.parentNode);">删除</span></div>';
+            $('#alipayChannelData').append(str);
+        });
+
+        //商户的微信单独、轮询切换
+        form.on('radio(wechatRadio)', function (data) {
+            var value = data.elem.value;
+            if(value == 1){
+                $('#wechatChannelId').css('display', 'block');
+                $('#wechatChannelId2').css('display', 'none');
+            }else{
+                $('#wechatChannelId').css('display', 'none');
+                $('#wechatChannelId2').css('display', 'block');
+            }
+        });
+        //商户的微信单独、轮询切换
+        form.on('select(wechatChannelId2)', function (data) {
+            var channel_id = data.elem.value;
+            if(!channel_id) return;
+            var channel_name = $(data.elem).find("option:selected").text();
+            var str = '<div style="margin: 10px 0px;"><input type="hidden" style="border: 0px solid white; width: 120px; height: 25px; background-color: white; margin: 3px 0px;" name="wechatChannelIdText[]"   value="' + channel_id + '"><span>' + channel_name + '</span>&ensp;&ensp;<span style="color: #009688; cursor: pointer;" onclick="x_admin_show(\'编辑通道_' + channel_name + '\', \'/admin2020/channel/set/only_money/1/id/'+channel_id+'\', 500, 400)">编辑</span>&ensp;&ensp;<span style="color: red; cursor: pointer;" onclick="this.parentNode.parentNode.removeChild(this.parentNode);">删除</span></div>';
+            $('#wechatChannelData').append(str);
+        });
+
+        //监听提交
+        form.on('submit(add)', function(data){
+            layer.load();
+            $.ajax({
+                url: "{:url('channel')}",
+                type:"POST",
+                data: data.field,
+                success:function(result){
+                    layer.msg(result.msg);
+                    setTimeout(function(){
+                        //关闭加载效果
+                        layer.closeAll();
+                        //关闭当前子窗口
+                        if(result.code == 200) x_admin_close(1);
+                    }, 1000);
+                }
+            });
+            return false;
+        });
+
+    });
+</script>
+{/block}

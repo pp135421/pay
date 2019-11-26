@@ -1,0 +1,80 @@
+{extend name="common/common" /}
+
+{block name="css"}
+
+{/block}
+
+{block name="body"}
+    <div class="x-body">
+      <div class="layui-row">
+        <form class="layui-form layui-col-md12 x-so" method="post">
+          <div style="border: 0px solid red; float: left;"><div class="layui-input-inline">
+              <select name="module">
+                <option value="">账户类型</option>
+                <option value="admin" {if condition="$showData['module'] == 'admin'"}selected="selected"{/if} >管理</option>
+                <option value="index" {if condition="$showData['module'] == 'index'"}selected="selected"{/if} >商户</option>
+              </select>
+            </div>
+            <div class="layui-input-inline">
+              <select name="result">
+                <option value="">登录结果</option>
+                <option value="1" {if condition="$showData['result'] == 1"}selected="selected"{/if} >成功</option>
+                <option value="2" {if condition="$showData['result'] == 2"}selected="selected"{/if} >失败</option>
+              </select>
+            </div>
+            <input type="text" name="ip"  placeholder="请输入ip" autocomplete="off" class="layui-input" value="{$showData['ip']}">
+            <input type="text" name="username"  placeholder="请输入账户" autocomplete="off" class="layui-input" value="{$showData['username']}">
+            <input style="width: 300px;" class="layui-input" placeholder="登录时间范围" name="login_time" id="login_time" value="{$showData['login_time']}">
+            <button class="layui-btn"  lay-submit="" lay-filter="sreach"><i class="layui-icon">&#xe615;</i></button>
+           <!--  <a class="layui-btn layui-btn-small" style="line-height:1.6em;" href="javascript:location.replace(location.href);" title="刷新">
+              <i class="layui-icon" style="line-height:30px">ဂ</i>
+            </a> -->
+          </div>
+          <span class="x-right" style="border: 0px solid red; line-height:40px; float: right;">总共：{$count} 条</span>
+        </form>
+      </div>
+      <table class="layui-table">
+        <thead>
+          <tr>
+            <th>登录账户</th>
+            <th>登录模块</th>
+            <th>登录IP</th>
+            <th>登录次数</th>
+            <th>登录结果</th>
+            <th>登录时间</th>
+          </tr>
+        </thead>
+        <tbody>
+          {volist name='list' id='vo'}
+          <tr>
+            <td>{$vo.username}</td>
+            <td>{$vo.module == 'admin' ? '<font color="green">管理</font>' : '<font color="red">商户</font>'}</td>
+            <td>{$vo.ip}（{:ip_to_city($vo.ip)}）</td>
+            <td>{$vo.login_count}</td>
+            <th>{if condition="$vo.result == 1"}<font color="green">成功</font>{else /}<font color="red">失败</font>{/if}</th>
+            <td>{:date('Y-m-d H:i:s',$vo.login_time)}</td>
+          </tr>
+          {/volist}
+        </tbody>
+      </table>
+      <div class="page">
+        <div>
+          {$list->render()}
+        </div>
+      </div>
+    </div>
+{/block}
+{block name="js"}
+<script>
+  layui.use('laydate', function(){
+    var laydate = layui.laydate;
+
+    //执行一个laydate实例
+    laydate.render({
+        elem: '#login_time', //指定元素
+        type: 'datetime',
+        range: '|'
+    });
+  });
+</script>
+{/block}

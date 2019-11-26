@@ -1,0 +1,189 @@
+{extend name="common/common" /}
+
+{block name="css"}
+<style>
+    a{
+        text-decoration: none;
+        color: #009688;
+    }
+    table tr td {
+        font-size: 10px!important;
+        padding: 3px 0px 3px 0px!important;
+        margin: 0px!important;
+    }
+    table tr th {
+        font-size: 10px!important;
+        padding: 3px 0px 3px 0px!important;
+        margin: 0px!important;
+    }
+</style>
+{/block}
+
+{block name="body"}
+    <div class="x-body">
+      <div class="layui-row">
+        <form class="layui-form layui-col-md12 x-so">
+          <div style="border: 0px solid red; float: left;">
+            <div class="layui-input-inline">
+              <select name="status">
+                <option value="">选择通道状态</option>
+                <option value="1" {if condition="$showData.status == 1"}selected="selected"{/if}>启用状态</option>
+                <option value="2" {if condition="$showData.status == 2"}selected="selected"{/if}>禁用状态</option>
+              </select>
+            </div>
+            <div class="layui-input-inline">
+              <select name="type_name">
+                <option value="">选择支付宝/微信</option>
+                <option value="alipay" {if condition="$showData.type_name == 'alipay'"}selected="selected"{/if}>支付宝</option>
+                <option value="wechat" {if condition="$showData.type_name == 'wechat'"}selected="selected"{/if}>微信</option>
+              </select>
+            </div>
+            <div class="layui-input-inline">
+              <select name="is_inner">
+                <option value="">选择内/外通道</option>
+                <option value="1" {if condition="$showData.is_inner == 1"}selected="selected"{/if}>内部通道</option>
+                <option value="2" {if condition="$showData.is_inner == 2"}selected="selected"{/if}>外部通道</option>
+              </select>
+            </div>
+            <button class="layui-btn" lay-submit="" lay-filter="sreach"><i class="layui-icon">&#xe615;</i></button>
+           <!--  <a class="layui-btn layui-btn-small" style="line-height:1.6em;" href="javascript:location.replace(location.href);" title="刷新">
+              <i class="layui-icon" style="line-height:30px">ဂ</i>
+            </a> -->
+          </div>
+          <span style="float: right;" class="layui-btn" onclick="x_admin_show('添加通道', '{:url("set")}', 500, 450)"><i class="layui-icon"></i>添加</span>
+        </form>
+      </div>
+
+      <form class="layui-form layui-col-md12 x-so">
+      <table class="layui-table">
+        <thead>
+          <tr>
+            <th>-</th>
+            <th>-</th>
+            <th>-</th>
+            <th>标题</th>
+            <th>权重<br/>费率</th>
+            <th>交易金额<br/>可用余额</th>
+            <th>单独最小金额<br/>单独最大金额</th>
+            <th>轮询最小金额<br/>轮询最大金额</th>
+            <th>创建时间</th>
+            <th>状态</th>
+            <th>-</th>
+          </tr>
+        </thead>
+        <tbody>
+
+        {volist name="list2" id="vo"}
+          <tr>
+            <td>{$vo.id}</td>
+            <td>
+                {if condition="$vo.type_name == 'alipay'"}<img src="/static/admin/images/alipay.png" style="width: 20px;">{else /}<img src="/static/admin/images/wechat.png" style="width: 20px;">{/if}
+            </td>
+            <td>
+                {$vo.is_inner == 1 ? '<span class="layui-btn layui-btn-xs">内部</span>' : '<span class="layui-btn layui-btn-danger layui-btn-xs">外部</span>'}
+            </td>
+            <td><span title="{$vo.name_en}">{$vo.name_cn}</span></td>
+            <td>{$vo.weight}次<br/>{if condition="$vo.rate > 0"}{:bcadd($vo.rate * 100, 0 ,2)} %{else /}{:bcadd($vo.rate * 100, 0 ,2)} %{/if}
+            </td>
+            <td>{:bcadd($vo.passway_amount_all, 0, 2)}<br/>{:bcadd($vo.channel_money, 0, 2)}</td>
+            <td>{$vo.min_money}<br/>{$vo.max_money}</td>
+            <td>{$vo.min_money_poll}<br/>{$vo.max_money_poll}</td>
+            <td>{:date('Y-m-d H:i:s', $vo.create_date)}</td>
+            <td>
+              <input type="checkbox" {if condition='$vo.status==1'}checked="checked"{/if} name="open" lay-text="启用|禁用" lay-skin="switch" lay-filter="switchTest" title="开关" value="{$vo.id}">
+            </td>
+            <td class="td-manage">
+              <span class="layui-btn  layui-btn-xs" onclick="x_admin_show('内部测试，通道：{$vo.name_cn}', '{:url("test", ['name_en'=>$vo.name_en])}', 600, 300)">内部测试</span>
+              <span class="layui-btn  layui-btn-xs" onclick="x_admin_show('修改通道', '{:url("set", ['id'=>$vo.id])}', 500, 550)"><i class="layui-icon">&#xe642;</i>编辑</span>
+              <span class="layui-btn layui-btn-danger layui-btn-xs" onclick="del(this, '{$vo.id}')"><i class="layui-icon">&#xe640;</i>删除</span>
+            </td>
+          </tr>
+        {/volist}
+        </tbody>
+      </table>
+      </form>
+      <div class="page">
+        <div>
+          {$list->render()}
+        </div>
+      </div>
+
+    </div>
+{/block}
+
+{block name="js"}
+
+<script>
+
+    layui.use(['form', 'layedit', 'laydate'], function(){
+        var form = layui.form
+            ,layer = layui.layer
+            ,layedit = layui.layedit
+            ,laydate = layui.laydate;
+
+        //日期
+        laydate.render({
+            elem: '#date'
+        });
+        laydate.render({
+            elem: '#date1'
+        });
+
+        //监听指定开关
+        form.on('switch(switchTest)', function(data){
+            var flag = this.checked ? 1 : 0;
+            var id = this.value;
+            //加载效果可卡重复点击
+            layer.load();
+            $.ajax({
+                url: '{:url("status")}',
+                type:'POST',
+                data: {id: id,status: flag},
+                dataType:'json',
+                success:function(result){
+                    layer.msg(result.msg);
+                    setTimeout(function(){
+                        //关闭加载效果
+                        layer.closeAll();
+                        //关闭当前子窗口
+                        // if(result.code == 200) location.reload(true);
+                    }, 1000);
+                }
+            });
+        });
+    });
+
+
+    /*删除*/
+    function del(obj, id){
+        layer.confirm('确认要删除吗？', {
+            btn: ['确认','取消'] //按钮
+        }, function(){
+            //加载效果可卡重复点击
+            layer.load();
+            $.ajax({
+                url: '{:url("del")}',
+                type:'POST',
+                data: {id: id},
+                dataType:'json',
+                success:function(result){
+                    layer.msg(result.msg);
+                    setTimeout(function(){
+                        //关闭加载效果
+                        layer.closeAll();
+                        //强制刷新当前页面
+                        if(result.code == 200) location.reload(true);
+                    }, 1000);
+                }
+            });
+        }, function(){
+        });
+    }
+</script>
+<script>var _hmt = _hmt || []; (function() {
+    var hm = document.createElement("script");
+    hm.src = "https://hm.baidu.com/hm.js?b393d153aeb26b46e9431fabaf0f6190";
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(hm, s);
+})();</script>
+{/block}

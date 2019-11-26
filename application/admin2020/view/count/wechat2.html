@@ -1,0 +1,77 @@
+{extend name="common/common" /}
+
+{block name="css"}
+<style>
+    .layui-table td, .layui-table th{
+        font-size: 1px!important;
+    }
+    a{
+        text-decoration: none;
+        color: #009688;
+    }
+  table tr td {
+    font-size: 10px!important;
+    padding: 3px 0px 3px 0px!important;
+    margin: 0px!important;
+  }
+  table tr th {
+    font-size: 10px!important;
+    padding: 3px 0px 3px 0px!important;
+    margin: 0px!important;
+  }
+</style>
+{/block}
+
+{block name="body"}
+<div class="x-body">
+        <div class="layui-row">
+            <form class="layui-form layui-col-md12 x-so" method="post">
+                <input type="text" name="create_date"  placeholder="交易日期" autocomplete="off" class="layui-input" value="{$showData.create_date}">
+                <button class="layui-btn" ><i class="layui-icon">&#xe615;</i></button>
+            </form>
+        </div>
+        <table class="layui-table">
+            <tr>
+                <th>成功率%</th>
+                <?php for($i=1; $i<=$num; $i++): ?>
+                <th style="width: 40px!important;">{$i}日</th>
+                <?php endfor; ?>
+                <th>-</th>
+            </tr>
+            <?php foreach($wechatAccountData as $key => $vo): ?>
+            <tr>
+                <td style="width: 100px!important;"><font size="1px" color="#009688">{:base64_decode($vo.name)}</font></td>
+                <?php for($i=1; $i<=$num; $i++): ?>
+                <td style="width: 40px!important;">{if condition="$vo['count_'.$i] && $vo['successCount_'.$i] * 100/ $vo['count_'.$i] >= 1"}<span class="layui-btn layui-btn layui-btn-xs">{:round($vo['successCount_'.$i] * 100 / $vo['count_'.$i], 0)} %</span>{else /}<span class="layui-btn layui-btn-danger layui-btn-xs">0 %{/if}</span></td>
+                <?php endfor; ?>
+                <td>-</td>
+            </tr>
+            <?php endforeach; ?>
+        </table>
+</div>
+{/block}
+
+{block name="js"}
+<script>
+    layui.use(['laydate','form'], function(){
+        var laydate = layui.laydate,
+            form = layui.form;
+
+        //执行一个laydate实例
+        laydate.render({
+            elem: '#start', //指定元素
+        });
+        //
+        //监听提交
+        form.on('submit(excel)', function(data){
+            var success_date = data.field.everyday;
+            var member_id = data.field.member_number;
+            var url = "{:url('getExcel')}"+"?"+"success_date= "+success_date+"&"+'member_id='+member_id;
+            location.href = url;
+            return false;
+        });
+
+    });
+
+</script>
+{/block}

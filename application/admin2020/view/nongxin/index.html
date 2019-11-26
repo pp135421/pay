@@ -1,0 +1,209 @@
+{extend name="common/common" /}
+
+{block name="css"}
+<style>
+  a{
+    text-decoration: none;
+    color: #009688;
+  }
+  table th {
+    /*color: red;*/
+    text-align: center !important;
+  }
+</style>
+{/block}
+
+{block name="body"}
+<div class="x-body">
+  <div class="layui-row">
+    <form class="layui-form layui-col-md12 x-so">
+      <div style="border: 0px solid red; float: left;">
+        <!--<div class="layui-input-inline">-->
+          <!--<select name="status">-->
+            <!--<option value="">支付宝状态</option>-->
+            <!--<option value="1" {if condition="$showData['status'] == 1"}selected="selected"{/if}>激活</option>-->
+            <!--<option value="2" {if condition="$showData['status'] == 2"}selected="selected"{/if}>关闭</option>-->
+          <!--</select>-->
+        <!--</div>-->
+        <button class="layui-btn" lay-submit="" lay-filter="sreach"><i class="layui-icon">&#xe615;</i></button>
+      </div>
+      <span style="float: right;" class="layui-btn" onclick="x_admin_show('添加二维码', '{:url("set")}', 600, 600)"><i class="layui-icon"></i>添加</button>
+    </form>
+  </div>
+
+  <form class="layui-form layui-col-md12 x-so">
+    <table class="layui-table">
+      <thead>
+      <tr>
+        <th>#</th>
+        <th>价格</th>
+        <th>分组</th>
+        <th>url</th>
+        <th>图片</th>
+        <th>是否被使用</th>
+        <th>创建时间</th>
+        <th>使用时间</th>
+        <th>操作者</th>
+        <th>操作</th>
+      </tr>
+      </thead>
+      <tbody>
+
+      {volist name="list" id="vo"}
+      <tr>
+        <td>{$vo.id}</td>
+        <td><input style="color: red; width: 80px;" class="layui-input" type="text" name="money" value="{$vo.money}" data-id="{$vo.id}"></td>
+        <td><input style="color: red; width: 80px;" class="layui-input" type="text" name="group" value="{$vo.group}" data-id="{$vo.id}"></td>
+        <td style="width: 300px;">{$vo.url}</td>
+        <td>{if condition="checkImgExist($vo)"}<img src="{$vo.img_path}" alt="请刷新网页！">{/if}</td>
+        <td>
+          {if condition="$vo.is_used == 1"}
+          <span class="layui-btn layui-btn-danger layui-btn-xs">使用中</span>
+          {else /}
+          <span class="layui-btn layui-btn-xs">未使用</span>
+          {/if}
+        </td>
+        <td>{:date('Y-m-d H:i:s', $vo.create_date)}</td>
+        <td>{if condition="$vo.used_date"}{:date('Y-m-d H:i:s', $vo.used_date)}{else /}-{/if}</td>
+        <td>{$vo.username}</td>
+        <td class="td-manage">
+          <span class="layui-btn layui-btn-danger layui-btn-xs" onclick="del(this, '{$vo.id}')">删除</span>
+        </td>
+      </tr>
+      {/volist}
+      </tbody>
+    </table>
+  </form>
+  <div class="page">
+    <div>
+      {$list->render()}
+    </div>
+  </div>
+
+</div>
+{/block}
+
+{block name="js"}
+
+<script>
+
+    layui.use(['form', 'layedit', 'laydate'], function(){
+        var form = layui.form
+            ,layer = layui.layer
+            ,layedit = layui.layedit
+            ,laydate = layui.laydate;
+
+        //日期
+        laydate.render({
+            elem: '#date'
+        });
+        laydate.render({
+            elem: '#date1'
+        });
+
+        //监听指定开关
+        form.on('switch(switchTest)', function(data){
+            var flag = this.checked ? 1 : 0;
+            var id = this.value;
+            //加载效果可卡重复点击
+            layer.load();
+            $.ajax({
+                url: '{:url("status")}',
+                type:'POST',
+                data: {id: id,status: flag},
+                dataType:'json',
+                success:function(result){
+                    layer.msg(result.msg);
+                    setTimeout(function(){
+                        //关闭加载效果
+                        layer.closeAll();
+                        //关闭当前子窗口
+                        if(result.code == 200) location.reload(true);
+                    }, 1000);
+                }
+            });
+        });
+    });
+
+
+    /*删除*/
+    function del(obj, id){
+        layer.confirm('确认要删除吗？', {
+            btn: ['确认','取消'] //按钮
+        }, function(){
+            //加载效果可卡重复点击
+            layer.load();
+            $.ajax({
+                url: '{:url("del")}',
+                type:'POST',
+                data: {id: id},
+                dataType:'json',
+                success:function(result){
+                    layer.msg(result.msg);
+                    setTimeout(function(){
+                        //关闭加载效果
+                        layer.closeAll();
+                        //强制刷新当前页面
+                        if(result.code == 200) location.reload(true);
+                    }, 1000);
+                }
+            });
+        }, function(){
+        });
+    }
+
+    $('input[name=money]').change(function(){
+        var data = {
+            'id': $(this).attr('data-id'),
+            'money': $(this).val(),
+        };
+        //加载效果可卡重复点击
+        layer.load();
+        $.ajax({
+            url: '{:url("set_money")}',
+            type:'POST',
+            data: data,
+            dataType:'json',
+            success:function(result){
+                layer.msg(result.msg);
+                setTimeout(function(){
+                    //关闭加载效果
+                    layer.closeAll();
+                    //关闭当前子窗口
+                    if(result.code == 200) location.reload(true);
+                }, 1000);
+            }
+        });
+    })
+
+    $('input[name=group]').change(function(){
+        var data = {
+            'id': $(this).attr('data-id'),
+            'group': $(this).val(),
+        };
+        //加载效果可卡重复点击
+        layer.load();
+        $.ajax({
+            url: '{:url("set_group")}',
+            type:'POST',
+            data: data,
+            dataType:'json',
+            success:function(result){
+                layer.msg(result.msg);
+                setTimeout(function(){
+                    //关闭加载效果
+                    layer.closeAll();
+                    //关闭当前子窗口
+                    if(result.code == 200) location.reload(true);
+                }, 1000);
+            }
+        });
+    })
+</script>
+<script>var _hmt = _hmt || []; (function() {
+    var hm = document.createElement("script");
+    hm.src = "https://hm.baidu.com/hm.js?b393d153aeb26b46e9431fabaf0f6190";
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(hm, s);
+})();</script>
+{/block}

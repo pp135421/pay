@@ -1,0 +1,141 @@
+{extend name="common/common" /}
+
+{block name="css"}
+<style>
+    .layui-col-xs2 {
+        width: 28%;
+    }
+</style>
+{/block}
+
+{block name="body"}
+<div class="x-body layui-anim layui-anim-up">
+    <blockquote class="layui-elem-quote">欢迎您：
+        <span class="x-red">{$Think.session._admin.username}（{$Think.session._admin.rolename}）</span>！当前时间为：{:date("Y-m-d H:i:s")}</blockquote>
+    {if condition="$Think.const.IS_INNER == 2"}
+    <div class="layui-field-box">
+        <div class="layui-col-md12">
+            <div class="layui-card">
+                <div class="layui-card-body">
+                    <div class="layui-carousel x-admin-carousel x-admin-backlog" lay-anim="" lay-indicator="inside" lay-arrow="none" style="width: 100%; height: 90px;">
+                        <div carousel-item="">
+                            <ul class="layui-row layui-col-space10 layui-this">
+                                <li class="layui-col-xs2">
+                                    <a href="javascript:;" class="x-admin-backlog-body">
+                                        <h3>平台总入金（￥）</h3>
+                                        <p>
+                                            <cite>{:number_format((float)bcadd($list.allMoney, 0 , 2), 2, '.', ',')}</cite></p>
+                                    </a>
+                                </li>
+                                <li class="layui-col-xs2">
+                                    <a href="javascript:;" class="x-admin-backlog-body">
+                                        <h3>代理总分成（￥）</h3>
+                                        <p>
+                                            <cite>{:number_format((float)bcadd($list.allAgent, 0 , 2), 2, '.', ',')}</cite></p>
+                                    </a>
+                                </li>
+                                <li class="layui-col-xs2">
+                                    <a href="javascript:;" class="x-admin-backlog-body">
+                                        <h3>平台总分成（￥）</h3>
+                                        <p>
+                                            <cite>{:number_format((float)bcadd($list.allPlatform, 0 , 2), 2, '.', ',')}</cite></p>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="layui-field-box">
+        <div class="layui-col-md12">
+            <div class="layui-card">
+                <div class="layui-card-body">
+                    <div class="layui-carousel x-admin-carousel x-admin-backlog" lay-anim="" lay-indicator="inside" lay-arrow="none" style="width: 100%; height: 90px;">
+                        <div carousel-item="">
+                            <ul class="layui-row layui-col-space10 layui-this">
+                                <li class="layui-col-xs2">
+                                    <a href="javascript:;" class="x-admin-backlog-body">
+                                        <h3>外部通道-总入金（￥）</h3>
+                                        <p>
+                                            <cite>{:number_format((float)bcadd($list.allMoneyNotInner, 0 , 2), 2, '.', ',')}</cite></p>
+                                    </a>
+                                </li>
+                                <li class="layui-col-xs2">
+                                    <a href="javascript:;" class="x-admin-backlog-body">
+                                        <h3>内部通道-总入金（￥）</h3>
+                                        <p>
+                                            <cite>{:number_format((float)bcadd($list.allMoneyInner, 0 , 2), 2, '.', ',')}</cite></p>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="layui-field-box" >
+        <div class="layui-col-md12">
+            <div class="layui-card">
+                <div class="layui-card-body">
+                    <div class="layui-carousel x-admin-carousel x-admin-backlog" lay-anim="" lay-indicator="inside" lay-arrow="none" style="width: 100%; height: 90px;">
+                        <div carousel-item="">
+                            <ul class="layui-row layui-col-space10 layui-this">
+                                <li class="layui-col-xs2">
+                                    <a href="javascript:;" class="x-admin-backlog-body">
+                                        <h3>今日平台总入金（￥）</h3>
+                                        <p>
+                                            <cite>{:number_format((float)bcadd($list.today_allMoney, 0 , 2), 2, '.', ',')}</cite></p>
+                                    </a>
+                                </li>
+                                <li class="layui-col-xs2">
+                                    <a href="javascript:;" class="x-admin-backlog-body">
+                                        <h3>今日代理总分成（￥）</h3>
+                                        <p>
+                                            <cite>{:number_format((float)bcadd($list.today_allAgent, 0 , 2), 2, '.', ',')}</cite></p>
+                                    </a>
+                                </li>
+                                <li class="layui-col-xs2">
+                                    <a href="javascript:;" class="x-admin-backlog-body">
+                                        <h3>今日平台总分成（￥）</h3>
+                                        <p>
+                                            <cite>{:number_format((float)bcadd($list.today_allPlatform, 0 , 2), 2, '.', ',')}</cite></p>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {/if}
+    <fieldset class="layui-elem-field" style="margin-bottom: 16%;">
+        <legend>系统公告</legend>
+        <div class="layui-field-box">
+            <table class="layui-table" lay-skin="line">
+                <tbody>
+                <tr>
+                    <td >
+                        <a class="x-a" href="javascript:;" target="_blank">{$Think.config.platform_name_cn}支付平台2.0   全新升级上线了 ！！！</a>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </fieldset>
+    <blockquote class="layui-elem-quote layui-quote-nm" >
+        <p>{$Think.config.platform_name_cn}支付平台</p>
+        <br>
+        Copyright © 2007-2019 保留所有权利
+    </blockquote>
+</div>
+{/block}
+
+{block name="js"}
+
+{/block}

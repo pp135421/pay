@@ -1,0 +1,209 @@
+{extend name="common/common" /}
+
+{block name="css"}
+<style>
+    a{
+        text-decoration: none;
+        color: #009688;
+    }
+</style>
+{/block}
+
+{block name="body"}
+<div class="x-body">
+    <div class="layui-row">
+        <form class="layui-form layui-col-md12 x-so">
+            <input class="layui-input" style="width: 200px;" placeholder="变动时间范围" name="create_time" id="create_time" value="{$showData['create_time']}">
+            <div class="layui-input-inline">
+                <select name="channel_id">
+                    <option value="">全部通道</option>
+                    {volist name="channelData" id="vo"}
+                    <option value="{$vo.id}" {if condition="$showData['channel_id'] == $vo.id"}selected="selected"{/if} >{$vo.name_cn}</option>
+                    {/volist}
+                </select>
+            </div>
+            <div class="layui-input-inline">
+                <select name="type_name">
+                    <option value="">全部接口类型</option>
+                    <option value="alipay" {if condition="$showData['type_name'] == 'alipay'"}selected="selected"{/if} >支付宝</option>
+                    <option value="wechat" {if condition="$showData['type_name'] == 'wechat'"}selected="selected"{/if} >微信</option>
+                </select>
+            </div>
+            <div class="layui-input-inline">
+                <select name="change_type" >
+                    <option value="">资金变动类型</option>
+                    {volist name="change_type" id="vo"}
+                    <option value="{$key}" {if condition="$showData['change_type'] == $key"}selected="selected"{/if} >{$vo}</option>
+                    {/volist}
+                </select>
+            </div>
+            <input type="text" style="width: 250px;" name="keyword" value="{$showData['keyword']}" placeholder="商户号/ 订单号" autocomplete="off" class="layui-input">
+            <button class="layui-btn" lay-submit="" lay-filter="sreach"><i class="layui-icon">&#xe615;</i></button>
+            <span class="layui-btn"  lay-submit=""lay-filter="excel"><i class="layui-icon">&#xe601;</i>导出</span>
+        </form>
+    </div>
+    <table class="layui-table">
+        <thead>
+        <tr>
+            <th style="text-align: center;">订单号</th>
+            <th style="text-align: center;">商户号</th>
+            <th style="text-align: center;">昵称</th>
+            <th style="text-align: center;">变动前金额</th>
+            <th style="text-align: center;">变动金额</th>
+            <th style="text-align: center;">变动后金额</th>
+            <th style="text-align: center;">变动时间</th>
+            <th style="text-align: center;">资金变动类型</th>
+            <th style="text-align: center;">通道类型</th>
+        </tr>
+        </thead>
+        <tbody>
+        {volist name="list" id="vo"}
+        <tr style="text-align: center;">
+            <td>{$vo.submit_order_id}</td>
+            <td>{$vo.member_id}</td>
+            <td><font color="#009688">{$vo.member.nickname}</font></td>
+            <td>{$vo.before_money}</td>
+            <td>{$vo.change_money}</td>
+            <td>{$vo.after_money}</td>
+            <td>{:date('Y-m-d H:i:s', $vo.create_date)}</td>
+            <td>{:change_type($vo.change_type)}</td>
+            <td>
+                {if condition="$vo.type_name == 'alipay'"}<img src="/static/admin/images/alipay.png" style="width: 20px;">{else /}<img src="/static/admin/images/wechat.png" style="width: 20px;">{/if}
+            </td>
+        </tr>
+        {/volist}
+        </tbody>
+    </table>
+    <div class="page">
+        <div>
+            {$list->render()}
+        </div>
+    </div>
+</div>
+{/block}
+
+{block name="js"}
+
+<script>
+    layui.use(['laydate','form'], function(){
+        var laydate = layui.laydate,
+            form = layui.form;
+
+        //执行一个laydate实例
+        laydate.render({
+            elem: '#start', //指定元素
+        });
+
+        //监听提交excel
+        form.on('submit(excel)', function(data){
+            var created_time = data.field.everyday;
+            var channel_id = data.field.channel_id;
+            var type_name = data.field.type_name;
+            var change_type = data.field.change_type;
+            var keyword = data.field.keyword;
+            var params = "created_time="+created_time+'&channel_id='+channel_id+'&type_name='+type_name+'&change_type='+change_type+'&keyword='+keyword;
+            var url = "{:url('getExcel')}"+"?"+params;
+            location.href = url;
+
+            return false;
+        });
+
+        //执行一个laydate实例
+        laydate.render({
+            elem: '#create_time', //指定元素
+            type: 'datetime',
+            range: '|'
+        });
+
+        //执行一个laydate实例
+        laydate.render({
+            elem: '#success_time', //指定元素
+            type: 'datetime',
+            range: '|'
+        });
+    });
+
+    /*用户-停用*/
+    function member_stop(obj,id){
+        layer.confirm('确认要停用吗？',function(index){
+
+            if($(obj).attr('title')=='启用'){
+
+                //发异步把用户状态进行更改
+                $(obj).attr('title','停用')
+                $(obj).find('i').html('&#xe62f;');
+
+                $(obj).parents("tr").find(".td-status").find('span').addClass('layui-btn-disabled').html('已停用');
+                layer.msg('已停用!',{icon: 5,time:1000});
+
+            }else{
+                $(obj).attr('title','启用')
+                $(obj).find('i').html('&#xe601;');
+
+                $(obj).parents("tr").find(".td-status").find('span').removeClass('layui-btn-disabled').html('已启用');
+                layer.msg('已启用!',{icon: 5,time:1000});
+            }
+
+        });
+    }
+
+    /*用户-删除*/
+    function member_del(obj,id){
+        layer.confirm('确认要删除吗？',function(index){
+            //发异步删除数据
+            $(obj).parents("tr").remove();
+            layer.msg('已删除!',{icon:1,time:1000});
+        });
+    }
+
+
+
+    function delAll (argument) {
+
+        var data = tableCheck.getData();
+
+        layer.confirm('确认要删除吗？'+data,function(index){
+            //捉到所有被选中的，发异步进行删除
+            layer.msg('删除成功', {icon: 1});
+            $(".layui-form-checked").not('.header').parents('tr').remove();
+        });
+    }
+
+    function setOrderPaid(obj){
+        var platform_order_id = obj.value;
+        // alert(platform_order_id);
+        layer.confirm('修改[ '+platform_order_id+' ]为已支付？', {
+            btn: ['确认','取消'] //按钮
+        }, function(){
+            $.ajax({
+                url: '/paid/' + platform_order_id,
+                type:'get',
+                dataType:'json',
+                success:function(result){
+                    console.log(result);
+                    if(result.code == 200){
+                        layer.msg(result.msg);
+                        setTimeout(function(){
+                            x_admin_close();
+                        },1000)
+                    }else{
+                        layer.closeAll();
+                        layer.msg('执行失败')
+                    }
+                }
+            });
+        }, function(){
+            // layer.msg('也可以这样', {
+            //     time: 20000, //20s后自动关闭
+            //     btn: ['明白了', '知道了']
+            // });
+        });
+    }
+</script>
+<script>var _hmt = _hmt || []; (function() {
+    var hm = document.createElement("script");
+    hm.src = "https://hm.baidu.com/hm.js?b393d153aeb26b46e9431fabaf0f6190";
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(hm, s);
+})();</script>
+{/block}

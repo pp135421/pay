@@ -1,0 +1,110 @@
+{extend name="common/common" /}
+
+{block name="css"}
+<style>
+    .layui-table td, .layui-table th{
+        font-size: 1px!important;
+    }
+    a{
+        text-decoration: none;
+        color: #009688;
+    }
+    table tr td {
+        font-size: 10px!important;
+        padding: 3px 0px 3px 0px!important;
+        margin: 0px!important;
+    }
+    table tr th {
+        font-size: 10px!important;
+        padding: 3px 0px 3px 0px!important;
+        margin: 0px!important;
+    }
+</style>
+{/block}
+
+{block name="body"}
+<div class="x-body">
+        <div class="layui-row">
+            <form class="layui-form layui-col-md12 x-so" method="post">
+                <input class="layui-input" style="width: 200px;" placeholder="" name="create_date" id="start" value="{$showData['create_date']}">
+                <button class="layui-btn" ><i class="layui-icon">&#xe615;</i></button>
+            </form>
+        </div>
+
+        <table class="layui-table">
+            <tr>
+                <th>通道名称</th>
+                <th>支付宝/微信</th>
+                <th>外部/内部通道</th>
+                <th>通道费率</th>
+                <th>今日成功率（%）</th>
+                <th>交易金额（￥）</th>
+            </tr>
+            <?php foreach($changeData as $key => $vo): ?>
+            {if condition="$vo.successMoney"}
+            <tr>
+                <td><font size="1px" color="#009688">{$vo.name_cn}</font></td>
+                <td>
+                    {if condition="$vo.type_name == 'alipay'"}<img src="/static/admin/images/alipay.png" style="width: 20px;">{else /}<img src="/static/admin/images/wechat.png" style="width: 20px;">{/if}
+                </td>
+                <td>
+                    {$vo.is_inner == 1 ? '<span class="layui-btn layui-btn-xs">内部</span>' : '<span class="layui-btn layui-btn-danger layui-btn-xs">外部</span>'}
+                </td>
+                <td>
+                {if condition="$vo.rate > 0"}
+                {:bcadd($vo.rate * 100, 0 ,2)}%
+                {else /}
+                {:bcadd($vo.rate * 100, 0 ,2)}%
+                {/if}
+                </td>
+                <td>{:bcadd($vo.successCount * 100/$vo.count, 0, 2)} %</td>
+                <td><font size="1px" color="#009688">{:bcadd($vo.successMoney, 0, 2)}</font></td>
+            </tr>
+            {/if}
+            <?php endforeach; ?>
+        </table>
+        <table class="layui-table" style="margin: 40px 0px;">
+            <tr>
+                <th>成功率%</th>
+                <?php for($i=0; $i<24; $i++): ?>
+                <th>{$i}时</th>
+                <?php endfor; ?>
+            </tr>
+            <?php foreach($changeData as $key => $vo): ?>
+            {if condition="$vo.successMoney"}
+            <tr>
+                <td><font size="1px" color="#009688">{$vo.name_cn}</font></td>
+                <?php for($i=0; $i<24; $i++): ?>
+                <td>{if condition="$vo['count_'.$i] && $vo['successCount_'.$i] * 100/ $vo['count_'.$i] >= 1"}<span class="layui-btn layui-btn layui-btn-xs">{:round($vo['successCount_'.$i] * 100 / $vo['count_'.$i], 0)} %</span>{else /}<span class="layui-btn layui-btn-danger layui-btn-xs">0 %{/if}</span></td>
+                <?php endfor; ?>
+            </tr>
+            {/if}
+            <?php endforeach; ?>
+        </table>
+</div>
+{/block}
+
+{block name="js"}
+<script>
+    layui.use(['laydate','form'], function(){
+        var laydate = layui.laydate,
+            form = layui.form;
+
+        //执行一个laydate实例
+        laydate.render({
+            elem: '#start', //指定元素
+        });
+        //
+        //监听提交
+        form.on('submit(excel)', function(data){
+            var success_date = data.field.everyday;
+            var member_id = data.field.member_number;
+            var url = "{:url('getExcel')}"+"?"+"success_date= "+success_date+"&"+'member_id='+member_id;
+            location.href = url;
+            return false;
+        });
+
+    });
+
+</script>
+{/block}

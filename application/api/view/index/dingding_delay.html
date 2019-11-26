@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+    <title></title>
+    <meta content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0" name="viewport">
+    <meta content="yes" name="apple-mobile-web-app-capable">
+    <meta content="black" name="apple-mobile-web-app-status-bar-style">
+    <meta content="telephone=no" name="format-detection">
+    <link href="/static/admin/css/hipay.css" rel="stylesheet" type="text/css">
+    <link href="/static/admin/css/style.css" rel="stylesheet" type="text/css">
+    <style type="text/css">
+        html,
+        body {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            background: #c14443;
+            overflow: hidden;
+        }
+    </style>
+    <style>
+        .demo {
+            margin: 1em 0;
+            padding: 1em 1em 2em;
+            background: #fff;
+        }
+
+        .demo h1 {
+            padding-left: 8px;
+            font-size: 24px;
+            line-height: 1.2;
+            border-left: 3px solid #108EE9;
+        }
+
+        .demo h1,
+        .demo p {
+            margin: 1em 0;
+        }
+
+        .demo .am-button + .am-button,
+        .demo .btn + .btn,
+        .demo .btn:first-child {
+            margin-top: 10px;
+        }
+
+        .fn-hide {
+            display: none !important;
+        }
+
+        input {
+            display: block;
+            padding: 4px 10px;
+            margin: 10px 0;
+            line-height: 28px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+    </style>
+</head>
+<body>
+<div class="aui-free-head">
+    <div class="aui-flex b-line">
+        <div class="aui-user-img">
+            <!-- <img src="./Public/Admin/images/tx.jpeg" alt=""> -->
+        </div>
+    </div>
+    <div id="xxx" class="aui-flex aui-flex-text">
+        <div class="aui-flex-box">
+            <h2>充值金额</h2>
+            <h3>￥ {:bcadd($info.amount, 0 ,2)}</h3>
+            <!-- <p>订单号：{$info.platform_order_id}</p> -->
+            <p>倒计时开始，支付宝授权中...</p>
+            <p>请耐心等待，请保持手机常亮！</p>
+        </div>
+    </div>
+
+    <a href="javascript:javascript()" class="aui-button" id="pay">
+        <button id="pay_btn">立即支付</button>
+    </a>
+</div>
+<script src="/static/common/jquery-3.3.1/jquery-3.3.1.min.js"></script>
+<script>
+function javascrip() {
+    history.go(0);
+}
+
+function javascript() {
+    var orderStr = ('{:html_entity_decode($info.special_str)}');
+    ap.tradePay({
+        orderStr: orderStr
+    }, function(result){
+        if(result.resultCode == 9000 || result.resultCode == "9000"){
+            alert("支付已完成");
+        }else{
+            delayOrder();
+        }
+    });
+}
+
+
+var num = 1;
+var timer = null;
+function delayOrder(){
+    timer = setInterval(function(){
+        var pay_btn =  $("#pay_btn");
+        // span.innerHTML= (num * 100 / 60).toFixed(2) + '%';
+        pay_btn.html('风控等待倒计时：<font color="red">' +  (30 - num) + '</font> 秒');
+        num++;
+        if(num >= 30){
+            pay_btn.attr("disabled", false);
+            pay_btn.html('立即支付');
+            pay_btn.click();
+            clearInterval(timer);
+            return;
+        }
+    }, 2000);
+}
+
+
+
+setTimeout(function(){
+    document.getElementById("pay_btn").click();
+    $("#pay_btn").attr("disabled", true);
+}, 1500);
+
+</script>
+<script>
+    var pageWidth = window.innerWidth;
+    var pageHeight = window.innerHeight;
+
+    if (typeof pageWidth != "number") {
+        //在标准模式下面
+        if (document.compatMode == "CSS1Compat") {
+            pageWidth = document.documentElement.clientWidth;
+            pageHeight = document.documentElement.clientHeight;
+        } else {
+            pageWidth = document.body.clientWidth;
+            pageHeight = window.body.clientHeight;
+        }
+    }
+    $('body').height(pageHeight);
+</script>
+<script src="/static/admin/js/alipayjsapi.inc.min.js"></script>
+<script>
+    ap.allowPullDownRefresh(false);
+    ap.onPullDownRefresh(function (res) {
+        if (!res.refreshAvailable) {
+            ap.alert({
+                content: '刷新已禁止',
+                buttonText: '恢复'
+            }, function () {
+                ap.allowPullDownRefresh(true);
+                ap.showToast('刷新已恢复')
+            });
+        }
+    });
+</script>
+</body>
+</html>

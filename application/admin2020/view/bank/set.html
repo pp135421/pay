@@ -1,0 +1,96 @@
+{extend name="common/common" /}
+
+{block name="css"}
+
+{/block}
+
+{block name="body"}
+<div class="x-body">
+    <input type="hidden"  name="id"  placeholder="" value="{if condition='$info'}{$info.id}{else /}0{/if}">
+    <div class="layui-form-item">
+        <label class="layui-form-label">
+            银行开户名
+        </label>
+        <div class="layui-input-inline">
+            <input type="text" name="bank_account"
+                   class="layui-input" value="{if condition='$info'}{$info.bank_account}{/if}">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">
+            银行编号
+        </label>
+        <div class="layui-input-inline">
+            <input type="text" name="bank_mark"
+                   class="layui-input" value="{if condition='$info'}{$info.bank_mark}{/if}">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">
+            银行中文名
+        </label>
+        <div class="layui-input-inline">
+            <input type="text" name="bank_name"
+                   class="layui-input" value="{if condition='$info'}{$info.bank_name}{/if}">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">
+            银行卡号
+        </label>
+        <div class="layui-input-inline">
+            <input type="text" name="card_no"
+                   class="layui-input" value="{if condition='$info'}{$info.card_no}{/if}">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">
+            <span style="color: red;">*</span> 隐藏id
+        </label>
+        <div class="layui-input-inline">
+            <input type="text" name="card_id"
+                   class="layui-input" value="{if condition='$info'}{$info.card_id}{/if}">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">
+        </label>
+        <button  class="layui-btn" id="btn" lay-filter="set" lay-submit="">
+            {if condition='$info'}修改{else /}添加{/if}
+        </button>
+    </div>
+</div>
+{/block}
+
+{block name="js"}
+<script type="text/javascript">
+    $("#btn").click(function(){
+        var data = {
+            'id': $('input[name=id]').val(),
+            'bank_account': $('input[name=bank_account]').val(),
+            'bank_mark': $('input[name=bank_mark]').val(),
+            'bank_name': $('input[name=bank_name]').val(),
+            'bank_account': $('input[name=bank_account]').val(),
+            'card_no': $('input[name=card_no]').val(),
+            'card_id': $('input[name=card_id]').val(),
+        };
+        //加载效果可卡重复点击
+        layer.load();
+        $.ajax({
+            url: '{:url("set")}',
+            type:'POST',
+            data: data,
+            dataType:'json',
+            success:function(result){
+                layer.msg(result.msg);
+                setTimeout(function(){
+                    //关闭加载效果
+                    layer.closeAll();
+                    //关闭当前子窗口
+                    if(result.code == 200) x_admin_close(1);
+                }, 1000);
+            }
+        });
+    });
+</script>
+{/block}

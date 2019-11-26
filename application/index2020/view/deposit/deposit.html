@@ -1,0 +1,101 @@
+{extend name="common/common" /}
+
+{block name="css"}
+
+{/block}
+
+{block name="body"}
+<div class="x-body">
+    <form class="layui-form" action="">
+        <table class="layui-table" style="width: 30%;">
+            <thead>
+            <tr>
+                <th>可提现金额 ￥</th>
+                <th>冻结资金 ￥</th>
+                <th>提现手续费 ￥</th>
+            </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><font color="#009688" size="4px;">{$memberInfo.balance}</font></td>
+                    <td><font color="red" size="4px;">{$memberInfo.blockedbalance}</font></td>
+                    <td><font color="red" size="4px;">{$memberInfo.deposit_amount}</font></td>
+                </tr>
+            </tbody>
+        </table>
+        <div class="layui-form-item">
+            <label class="layui-form-label">银行卡</label>
+            <div class="layui-input-block" style="width: 190px;">
+                <select name="card_number">
+                    <option value="">请选择银行卡</option>
+                    {volist name="bankCardData" id="vo"}
+                    <option value="{$vo.card_number}">{$vo.bank_account} | {$vo.card_number} | {$vo.bankname}</option>
+                    {/volist}
+                </select>
+            </div>
+        </div>
+        <div class="layui-form-item" style="margin-top: 2%;">
+            <label for="L_email" class="layui-form-label">
+                提现金额
+            </label>
+            <div class="layui-input-inline">
+                <input type="text"  name="depoist_money"  class="layui-input" value="">
+            </div>
+            <div class="layui-form-mid layui-word-aux">
+                单笔最高提现 {$drawingsInfo.max_money} ￥ | 最少提现 {$drawingsInfo.min_money} ￥
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label for="L_email" class="layui-form-label">
+                支付密码
+            </label>
+            <div class="layui-input-inline">
+                <input type="password"  name="paypwd"  class="layui-input" value="">
+            </div>
+            <div class="layui-form-mid layui-word-aux">
+                <!--<span class="x-red">*</span>将会成为您唯一的登入名-->
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label for="L_repass" class="layui-form-label">
+            </label>
+            <span  class="layui-btn" lay-filter="add" lay-submit="">
+                申请
+            </span>
+            <input type="hidden" name="max_money" value="{$drawingsInfo.max_money}">
+            <input type="hidden" name="min_money" value="{$drawingsInfo.min_money}">
+        </div>
+    </form>
+</div>
+{/block}
+
+{block name="js"}
+<script>
+    layui.use(['form','layer'], function(){
+        $ = layui.jquery;
+        var form = layui.form
+            ,layer = layui.layer;
+
+        //监听提交
+        form.on('submit(add)', function(data){
+            // console.log(data);return;
+            layer.load();
+            $.ajax({
+                url: "{:url('deposit')}",
+                type:"POST",
+                data: data.field,
+                success:function(result){
+                    layer.msg(result.msg);
+                    setTimeout(function(){
+                        //关闭加载效果
+                        layer.closeAll();
+                        //关闭当前子窗口
+                        if(result.code == 200) location.reload(true);
+                    }, 1000);
+                }
+            });
+            return false;
+        });
+    });
+</script>
+{/block}

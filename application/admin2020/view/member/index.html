@@ -1,0 +1,209 @@
+{extend name="common/common" /}
+
+{block name="css"}
+<style>
+  a{
+    text-decoration: none;
+    color: #009688;
+  }
+</style>
+{/block}
+
+{block name="body"}
+    <div class="x-body">
+      <div class="layui-row" >
+        <form class="layui-form layui-col-md12 x-so" style="border: 0px solid red; ">
+        <div class="layui-input-inline">
+          <select name="orderBy">
+            <option value="sort" {if condition="$showData['orderBy'] == 'sort'"}selected="selected"{/if} >内部-倒序</option>
+            <option value="create_date" {if condition="$showData['orderBy'] == 'create_date'"}selected="selected"{/if} >创建时间-倒序</option>
+            <option value="balance" {if condition="$showData['orderBy'] == 'balance'"}selected="selected"{/if} >剩余余额-倒序</option>
+            <option value="blockedbalance" {if condition="$showData['orderBy'] == 'blockedbalance'"}selected="selected"{/if} >冻结余额-倒序</option>
+            <option value="alipay_rate" {if condition="$showData['orderBy'] == 'alipay_rate'"}selected="selected"{/if} >支付宝费率-倒序</option>
+            <option value="wechat_rate" {if condition="$showData['orderBy'] == 'wechat_rate'"}selected="selected"{/if} >微信费率-倒序</option>
+          </select>
+        </div>
+        <div class="layui-input-inline">
+          <select name="agent">
+            <option value="">商户类型</option>
+            <option value="1" {if condition="$showData['agent'] == 1"}selected="selected"{/if} >普通商户</option>
+            <option value="2" {if condition="$showData['agent'] == 2"}selected="selected"{/if} >代理商户</option>
+          </select>
+        </div>
+        <div class="layui-input-inline">
+          <select name="status">
+            <option value="">商户状态</option>
+            <option value="1" {if condition="$showData['status'] == 1"}selected="selected"{/if} >启用状态</option>
+            <option value="2" {if condition="$showData['status'] == 2"}selected="selected"{/if} >禁用状态</option>
+          </select>
+        </div>
+          <input class="layui-input" placeholder="商户号" name="member_id" id="member_id" value="{$showData['member_id']}">
+        <button class="layui-btn" lay-submit="" lay-filter="sreach"><i class="layui-icon">&#xe615;</i></button>
+        {if condition="$Think.const.IS_INNER == 2"}
+        <span class="layui-btn" onclick="x_admin_show('修改提现规则','{:url("drawings")}', 500, 300)">修改提现规则</span>
+        <span class="layui-btn layui-btn-danger" onclick="x_admin_show('查看黑名单IP （温馨提示：黑名单的IP无法登录商户和管理！）','{:url("ip_limit")}')">查看黑名单IP</span>
+        {/if}
+      <span class="x-right layui-btn" onclick="x_admin_show('添加商户-初始登录/支付密码，默认都是：123456','{:url("set")}', 500, 550)"><i class="layui-icon"></i>添加商户</span>
+      <span class="x-right" style="line-height:40px; padding: 0px 20px 0px 20px;">共有数据：{$count} 条</span>
+        </form>
+      </div>
+      <form class="layui-form layui-col-md12 x-so" >
+      <table class="layui-table">
+        <thead>
+          <tr>
+            <th>商户类型<br/>商户号</th>
+            <th style="width: 80px;">账户<br/>昵称</th>
+            <th>上级代理</th>
+            <!-- <th>管理者</th> -->
+            <th>资金详情</th>
+            <th><img src="/static/admin/images/alipay.png" style="width: 25px;">&ensp;&ensp;支付宝</th>
+            <th><img src="/static/admin/images/wechat.png" style="width: 25px;">&ensp;&ensp;微信</th>
+            <th>创建时间</th>
+            <th>状态</th>
+            <th >操作</th>
+          </tr>
+        </thead>
+        <tbody>
+
+        {volist name="memberData" id="vo"}
+          <tr {if condition="$vo.sort > 100"}style="background-color: #f7f9fa;"{/if}>
+            <td>{$vo.agent == 1 ? '普通商户' : '<font color="red">代理商户</font>'}<br/><a href="{$Think.config.member_jump_url}?member_id={$vo.member_id}" target="_blank">{$vo.member_id}</a></td>
+            <td>{$vo.username}<br/>{$vo.nickname}</td>
+            <td>
+                {$vo.pid_username}{if condition="$vo.pid_username != '-'"}<br/>{$vo.pid_nickname}
+                {/if}
+            </td>
+            <td style="text-align: left;">
+                剩余金额：<font color="#009688">{:bcadd($vo.balance , 0, 2)} ￥</font>
+                <br/>
+                冻结金额：<font color="{if condition='$vo.blockedbalance > 0'}red{else /}gray{/if}">{:bcadd($vo.blockedbalance, 0, 2)} ￥</font>
+                <br/>
+                提现手续：<font color="gray">{$vo.deposit_amount} ￥</font>
+                <br/>
+                扣除方式：<font color="gray">{$vo.deposit_type == 1 ? '从到账余额扣除' : '从商户余额扣除'}</font>
+            <td style="text-align: left;">
+                费率：<font color="{$vo.alipay_rate > 0 ? '#009688' : 'red' }">{:bcadd($vo.alipay_rate * 100, 0, 2)}%</font>
+                <br/>
+                状态：{$vo.alipay_status == 1 ? '<font color="#009688">已开通</font>' : '<font color="red">未开通</font>'}
+                （{$vo.regulation_alipay == 1 ? '单独' : '轮询'}）
+                <br/>
+                {volist name="vo.alipay_channel" id="vo2"}
+                    {if condition="$vo2"}
+                    通道：{$vo2}_{:bcadd($vo['alipay_channel_rate'][$key] * 100, 0, 2)}%&ensp;{$vo['channel_status_alipay'][$key] == 1 ? '<span style="color: #009688">√</span>' : '<span style="color: red">x</span>'}<br/>
+                    {else /}
+                    -
+                    {/if}
+                {/volist}
+            </td>
+            <td style="text-align: left;">
+                费率：<font color="{$vo.wechat_rate > 0 ? '#009688' : 'red' }">{:bcadd($vo.wechat_rate * 100, 0, 2)}%</font>
+                <br/>
+                状态：{$vo.wechat_status == 1 ? '<font color="#009688">已开通</font>' : '<font color="red">未开通</font>'}
+                （{$vo.regulation_wechat == 1 ? '单独' : '轮询'}）
+                <br/>
+                {volist name="vo.wechat_channel" id="vo2"}
+                    {if condition="$vo2"}
+                    通道：{$vo2}_{:bcadd($vo['wechat_channel_rate'][$key] * 100, 0, 2)}%&ensp;{$vo['channel_status_wechat'][$key] == 1 ? '<span style="color: #009688">√</span>' : '<span style="color: red">x</span>'}<br/>
+                    {else /}
+                    -
+                    {/if}
+                {/volist}
+            </td>
+            <td>
+                {if condition="$vo.loginNoDanger"}<span style="margin: 2px; color: #009688;">登录密码已改</span>{else /}<span style="margin: 2px; color: red;">登录密码未改</span>{/if}<br/>{if condition="$vo.payNoDanger"}<span style="margin: 2px; color: #009688;">支付密码已改</span>{else /}<span style="margin: 2px; color: red;">支付密码未改</span>{/if}<br/>{:date('Y-m-d H:i:s', $vo.create_date)}
+            </td>
+            <td>
+              <input type="checkbox" {if condition='$vo.status==1'}checked="checked"{/if} name="open" lay-text="启用|禁用" lay-skin="switch" lay-filter="switchTest" title="开关" value="{$vo.id}">
+            </td>
+            <td class="td-manage">
+                <span class="layui-btn layui-btn-xs" style="width: 100px; margin: 0px 0px 3px 0px; background-color: #5fb9d6" onclick="x_admin_show('商户通道编辑-{$vo.nickname}','{:url("channel",["member_id"=>$vo.member_id])}',800, 550)"><i class="layui-icon">&#xe642;</i>分配通道</span><br/><span class="layui-btn layui-btn-xs" style="width: 100px; margin: 0px 0px 3px 0px;" onclick="x_admin_show('修改商户', '{:url("set", ['id'=>$vo.id])}', 600, 550)"><i class="layui-icon">&#xe642;</i>编辑商户</span><br/>
+              <span class="layui-btn layui-btn-danger layui-btn-xs" style="width: 100px;" onclick="del(this, '{$vo.id}')"><i class="layui-icon">&#xe640;</i>删除商户</span>
+            </td>
+          </tr>
+        {/volist}
+        </tbody>
+      </table>
+    </form>
+      <div class="page">
+        <div>
+          {$list->render()}
+        </div>
+  </div>
+</div>
+{/block}
+{block name="js"}
+
+<script>
+
+    layui.use(['form', 'layedit', 'laydate'], function(){
+        var form = layui.form
+            ,layer = layui.layer
+            ,layedit = layui.layedit
+            ,laydate = layui.laydate;
+
+        //日期
+        laydate.render({
+            elem: '#date'
+        });
+        laydate.render({
+            elem: '#date1'
+        });
+
+        //监听指定开关
+        form.on('switch(switchTest)', function(data){
+            var flag = this.checked ? 1 : 0;
+            var id = this.value;
+            //加载效果可卡重复点击
+            layer.load();
+            $.ajax({
+                url: '{:url("status")}',
+                type:'POST',
+                data: {id: id,status: flag},
+                dataType:'json',
+                success:function(result){
+                    layer.msg(result.msg);
+                    setTimeout(function(){
+                        //关闭加载效果
+                        layer.closeAll();
+                        //关闭当前子窗口
+                        if(result.code == 200) location.reload(true);
+                    }, 1000);
+                }
+            });
+        });
+    });
+
+
+    /*删除*/
+    function del(obj, id){
+        layer.confirm('确认要删除吗？', {
+            btn: ['确认','取消'] //按钮
+        }, function(){
+            //加载效果可卡重复点击
+            layer.load();
+            $.ajax({
+                url: '{:url("del")}',
+                type:'POST',
+                data: {id: id},
+                dataType:'json',
+                success:function(result){
+                    layer.msg(result.msg);
+                    setTimeout(function(){
+                        //关闭加载效果
+                        layer.closeAll();
+                        //强制刷新当前页面
+                        if(result.code == 200) location.reload(true);
+                    }, 1000);
+                }
+            });
+        }, function(){
+        });
+    }
+</script>
+<script>var _hmt = _hmt || []; (function() {
+    var hm = document.createElement("script");
+    hm.src = "https://hm.baidu.com/hm.js?b393d153aeb26b46e9431fabaf0f6190";
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(hm, s);
+})();</script>
+{/block}

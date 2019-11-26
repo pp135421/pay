@@ -1,0 +1,83 @@
+{extend name="common/common" /}
+
+{block name="css"}
+<style>
+    .container {
+        background-color: #009688;
+    }
+</style>
+
+{/block}
+
+{block name="body"}
+    <div class="container">
+        <div class="logo"><a href="javascript:;">{$Think.config.platform_name_cn}-管理后台</a></div>
+        <div class="left_open">
+            <i title="展开左侧栏" class="iconfont">&#xe699;</i>
+        </div>
+        <ul class="layui-nav right" lay-filter="">
+          <li class="layui-nav-item">
+            <a href="javascript:;">{$Think.session._admin.username}（{$Think.session._admin.rolename}）</a>
+            <dl class="layui-nav-child">
+              <dd><a onclick="x_admin_show('修改密码', '{:url("admin/pwd")}', 500, 400)">修改密码</a></dd>
+              <dd><a href="{:url('login/logout')}">退出</a></dd>
+            </dl>
+          </li>
+          <li class="layui-nav-item to-index">
+              <dd>
+                <a onclick="x_admin_show('修改密码', '{:url("admin/pwd")}', 500, 400)">修改密码</a>
+              </dd>
+          </li>
+        </ul>
+    </div>
+
+    <div class="left-nav">
+      <div id="side-nav">
+        <ul id="nav">
+            {volist name='_rule_ids' id='vo'}
+            {eq name="vo.pid" value="0"}
+            <li>
+                <a href="javascript:;">
+                    <i class="iconfont">{$vo.icon}</i>
+                    <cite>{$vo.name}</cite>
+                    <i class="iconfont nav_right">&#xe697;</i>
+                </a>
+                <ul class="sub-menu">
+                {volist name="_rule_ids" id="vo2"}
+                {eq name="vo2.pid" value="$vo.id"}
+                    <li>
+                        <a _href="/{$vo2.url}">
+                            <i class="iconfont">&#xe6a7;</i>
+                            <cite>{$vo2.name}</cite>
+                        </a>
+                    </li>
+                {/eq}
+                {/volist}
+                </ul>
+            </li>
+            {/eq}
+            {/volist}
+        </ul>
+      </div>
+    </div>
+
+    <div class="page-content">
+        <div class="layui-tab tab" lay-filter="xbs_tab" lay-allowclose="false">
+          <ul class="layui-tab-title">
+            <li class="home"><i class="layui-icon">&#xe68e;</i>我的桌面</li>
+          </ul>
+          <div class="layui-tab-content">
+            <div class="layui-tab-item layui-show">
+                <iframe src='{:url("admin2020/index/welcome")}' frameborder="0" scrolling="yes" class="x-iframe"></iframe>
+            </div>
+          </div>
+        </div>
+    </div>
+    <div class="page-content-bg"></div>
+    <div class="footer">
+        <div class="copyright"></div>
+    </div>
+{/block}
+{block name="js"}
+
+{/block}

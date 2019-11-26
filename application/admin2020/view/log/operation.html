@@ -1,0 +1,64 @@
+{extend name="common/common" /}
+
+{block name="css"}
+
+{/block}
+
+{block name="body"}
+    <div class="x-body">
+      <div class="layui-row">
+        <form class="layui-form layui-col-md12 x-so" method="post">
+          <div style="border: 0px solid red; float: left;">
+            <input style="width: 300px;" class="layui-input" placeholder="操作时间范围" name="create_date" id="create_date" value="{$showData['create_date']}">
+            <input type="text" name="username"  placeholder="请输入账户" autocomplete="off" class="layui-input" value="{$showData['username']}">
+            <input type="text" style="width: 200px;" name="msg"  placeholder="模糊搜索操作内容" autocomplete="off" class="layui-input" value="{$showData['msg']}">
+            <button class="layui-btn"  lay-submit="" lay-filter="sreach"><i class="layui-icon">&#xe615;</i></button>
+            <!-- <a class="layui-btn layui-btn-small" style="line-height:1.6em;" href="javascript:location.replace(location.href);" title="刷新">
+              <i class="layui-icon" style="line-height:30px">ဂ</i>
+            </a> -->
+          </div>
+          <span class="x-right" style="border: 0px solid red; line-height:40px; float: right;">总共：{$count} 条</span>
+        </form>
+      </div>
+      <table class="layui-table">
+        <thead>
+          <tr>
+            <th>操作账户</th>
+            <th>操作内容</th>
+            <th>操作者IP</th>
+            <th>操作时间</th>
+          </tr>
+        </thead>
+        <tbody>
+          {volist name='list' id='vo'}
+          <tr>
+            <td style="width: 60px;">{$vo.username}</td>
+            <td>{$vo.msg}</td>
+            <td style="width: 150px;">{$vo.ip}<br/>{:ip_to_city($vo.ip)}</td>
+            <td style="width: 120px;">{:date('Y-m-d H:i:s',$vo.create_date)}</td>
+          </tr>
+          {/volist}
+        </tbody>
+      </table>
+      <div class="page">
+        <div>
+          {$list->render()}
+        </div>
+      </div>
+    </div>
+{/block}
+{block name="js"}
+<script>
+  layui.use('laydate', function(){
+    var laydate = layui.laydate;
+
+    //执行一个laydate实例
+    laydate.render({
+        elem: '#create_date', //指定元素
+        type: 'datetime',
+        range: '|'
+    });
+  });
+
+</script>
+{/block}

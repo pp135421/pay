@@ -1,0 +1,86 @@
+{extend name="common/common" /}
+
+{block name="css"}
+<style>
+    .layui-table td, .layui-table th{
+        font-size: 1px!important;
+    }
+    a{
+        text-decoration: none;
+        color: #009688;
+    }
+</style>
+{/block}
+
+{block name="body"}
+<div class="x-body">
+    <div class="layui-row">
+
+        <form class="layui-form layui-col-md12 x-so" method="post">
+            <input class="layui-input" style="width: 200px;" placeholder="" name="create_date" id="start" value="{$showData['create_date']}">
+            <input type="text" name="member_id"  placeholder="商户号" autocomplete="off" class="layui-input" value="{$showData['member_id']}">
+            <button class="layui-btn" ><i class="layui-icon">&#xe615;</i></button>
+            <!-- <span class="layui-btn"   lay-submit=""lay-filter="excel"><i class="layui-icon">&#xe601;</i>导出</span> -->
+        </form>
+    </div>
+    <form class="layui-form" action="">
+        <table class="layui-table" style="">
+            <thead>
+            <tr>
+                <th>#</th>
+                <th>商户号</th>
+                <th>昵称</th>
+                <th>成功交易 ￥</th>
+                <th>实际到账 ￥</th>
+                <th>平台利润 ￥</th>
+                <th>通道扣除 ￥</th>
+                <th>代理分成 ￥</th>
+                <th>申请下发金额 ￥</th>
+                <th>当前剩余金额 ￥</th>
+            </tr>
+            </thead>
+            <tbody>
+            {volist name="memberData" id="vo"}
+            <tr>
+                <td>{$key+1}</td>
+                <td><a href="{$Think.config.member_jump_url}?member_id={$vo.member_id}" target="_blank">{$vo.member_id}</a></td>
+                <td>{$vo.nickname}</td>
+                <td><font size="2px" color="#009688">{:bcadd($vo.total_money, 0, 2)}</font></td>
+                <td><font size="2px" color="#009688">{:bcadd($vo.income_deposit, 0, 2)}</font></td>
+                <td><font size="2px" color="#009688">{:bcadd($vo.platform_deposit, 0, 2)}</font></td>
+                <td><font size="2px" color="#009688">{:bcadd($vo.passage_deposit, 0, 2)}</font></td>
+                <td><font size="2px" color="#009688">{:bcadd($vo.agent_deposit, 0, 2)}</font></td>
+                <td><font size="2px" color="red">{:bcadd($vo.issue_money, 0, 2)}</font></td>
+                <td><font size="2px" color="#009688">{:bcadd($vo.balance, 0, 2)}</font></td>
+            </tr>
+            {/volist}
+            </tbody>
+        </table>
+    </form>
+</div>
+{/block}
+
+{block name="js"}
+<script>
+    layui.use(['laydate','form'], function(){
+        var laydate = layui.laydate,
+            form = layui.form;
+
+        //执行一个laydate实例
+        laydate.render({
+            elem: '#start', //指定元素
+        });
+        //
+        //监听提交
+        form.on('submit(excel)', function(data){
+            var created_time = data.field.everyday;
+            var member_id = data.field.member_number;
+            var url = "{:url('getExcel')}"+"?"+"created_time= "+created_time+"&"+'member_id='+member_id;
+            location.href = url;
+            return false;
+        });
+
+    });
+
+</script>
+{/block}

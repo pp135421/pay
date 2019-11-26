@@ -1,0 +1,92 @@
+{extend name="common/common" /}
+{block name="css"}
+<style>
+    a{
+        text-decoration: none;
+        color: #009688;
+    }
+</style>
+{/block}
+{block name="body"}
+<div class="x-body">
+    <xblock>
+        <span class="x-right" style="line-height:40px">共有数据：{$count} 条</span>
+    </xblock>
+    <table class="layui-table layui-form">
+        <thead>
+            <th>#</th>
+            <th>IP</th>
+            <th>省市</th>
+            <th>创建时间</th>
+            <th>操作</th>
+        </thead>
+        <tbody>
+        {volist name="list" id="vo"}
+        <tr>
+            <td>{$key+1}</td>
+            <td>{$vo.ip}</td>
+            <td>{:ip_to_city($vo.ip)}</td>
+            <td>{:date('Y-m-d H:i:s', $vo.create_date)}</td>
+            <td class="td-manage">
+                <span class="layui-btn layui-btn-sm" onclick="x_admin_show('查看失败登录IP日志-{$vo.ip}','{:url("log/login",["ip"=>$vo.ip])}')">查看失败登录IP日志</span>
+                <span class="layui-btn layui-btn-danger layui-btn-sm" onclick="del(this, '{$vo.id}')"><i class="layui-icon">&#xe640;</i>删除（关联的失败登录IP日志也删除）</span>
+            </td>
+            </td>
+        </tr>
+        {/volist}
+        </tbody>
+    </table>
+    <div class="page">
+        <div>
+            {$list->render()}
+        </div>
+    </div>
+</div>
+
+{/block}
+{block name="js"}
+<script>
+    layui.use(['form', 'layedit', 'laydate'], function(){
+        var form = layui.form
+            ,layer = layui.layer
+            ,layedit = layui.layedit
+            ,laydate = layui.laydate;
+
+        //日期
+        laydate.render({
+            elem: '#date'
+        });
+        laydate.render({
+            elem: '#date1'
+        });
+
+    });
+
+
+    /*删除*/
+    function del(obj, id){
+        layer.confirm('确认要删除吗？', {
+            btn: ['确认','取消'] //按钮
+        }, function(){
+            //加载效果可卡重复点击
+            layer.load();
+            $.ajax({
+                url: '{:url("ip_del")}',
+                type:'POST',
+                data: {id: id},
+                dataType:'json',
+                success:function(result){
+                    layer.msg(result.msg);
+                    setTimeout(function(){
+                        //关闭加载效果
+                        layer.closeAll();
+                        //强制刷新当前页面
+                        if(result.code == 200) location.reload(true);
+                    }, 1000);
+                }
+            });
+        }, function(){
+        });
+    }
+</script>
+{/block}
